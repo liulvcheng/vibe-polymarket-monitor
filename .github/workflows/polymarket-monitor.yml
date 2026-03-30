@@ -1,0 +1,95 @@
+name: Polymarket Monitor
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 1,4,7,10,13,16,19,22 * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      TZ: Asia/Shanghai
+      PM_ADDRESS: ${{ secrets.PM_ADDRESS }}
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+
+    steps:
+      - name: Checkout default branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Restore monitor state
+        shell: bash
+        run: |
+          mkdir -p state
+          echo '{"address":"","snapshots":[]}' > state/state.json
+          set +e
+          git ls-remote --exit-code origin refs/heads/monitor-state >/dev/null 2>&1
+          ls_remote_status=$?
+          set -e
+
+          if [ "$ls_remote_status" -eq 0 ]; then
+            git fetch origin monitor-state:monitor-state
+            git show monitor-state:state/state.json > state/state.json
+          elif [ "$ls_remote_status" -eq 2 ]; then
+            echo "monitor-state branch not found; starting with empty state"
+          else
+            echo "Failed to query monitor-state branch" >&2
+            exit 1
+          fi
+
+          cp state/state.json "$RUNNER_TEMP/state.json"
+
+      - name: Run monitor
+        run: node src/main.js
+
+      - name: Persist monitor state
+        if: success()
+        shell: bash
+        run: |
+          cp state/state.json "$RUNNER_TEMP/state.json"
+          set +e
+          git ls-remote --exit-code origin refs/heads/monitor-state >/dev/null 2>&1
+          ls_remote_status=$?
+          set -e
+
+          if [ "$ls_remote_status" -eq 0 ]; then
+            git fetch origin monitor-state:monitor-state
+            git switch --force-create monitor-state-work monitor-state
+          elif [ "$ls_remote_status" -eq 2 ]; then
+            git switch --orphan monitor-state-work
+            git rm -rf . >/dev/null 2>&1 || true
+          else
+            echo "Failed to query monitor-state branch" >&2
+            exit 1
+          fi
+
+          mkdir -p state
+          cp "$RUNNER_TEMP/state.json" state/state.json
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add state/state.json
+
+          if git diff --cached --quiet; then
+            echo "No state changes to commit"
+            exit 0
+          fi
+
+          git commit -m "chore: update monitor state"
+          git push origin HEAD:monitor-state --force-with-lease
