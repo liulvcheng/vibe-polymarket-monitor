@@ -1,1 +1,1 @@
-# vibe-polymarket--monitor
+# vibe-polymarket-monitor
