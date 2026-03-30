@@ -1,0 +1,16 @@
+{
+  "name": "vibe-polymarket-monitor",
+  "version": "1.0.0",
+  "description": "GitHub Actions monitor for a Polymarket account",
+  "type": "module",
+  "scripts": {
+    "start": "node src/main.js",
+    "test": "node --test"
+  },
+  "directories": {
+    "doc": "docs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
