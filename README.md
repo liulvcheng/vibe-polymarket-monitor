@@ -57,6 +57,14 @@ Action workflow 位于：
 
 - `.github/workflows/polymarket-monitor.yml`
 
+代码文件使用驼峰命名，例如：
+
+- `src/fetchPm.js`
+- `src/buildSnapshot.js`
+- `src/buildDiff.js`
+- `src/formatMessage.js`
+- `src/sendTelegram.js`
+
 状态文件会保存在：
 
 - `monitor-state` 分支

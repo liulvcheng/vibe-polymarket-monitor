@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { buildPositionKey, buildSnapshot } from "../src/build-snapshot.js";
+import { buildPositionKey, buildSnapshot } from "../src/buildSnapshot.js";
 
 const rawPositions = [
   {

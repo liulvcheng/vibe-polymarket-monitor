@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { sendTelegramMessages } from "../src/send-telegram.js";
+import { sendTelegramMessages } from "../src/sendTelegram.js";
 
 test("sendTelegramMessages posts a single text message when content fits", async () => {
   const sentRequests = [];

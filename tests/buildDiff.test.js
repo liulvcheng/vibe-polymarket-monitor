@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { buildDiff } from "../src/build-diff.js";
+import { buildDiff } from "../src/buildDiff.js";
 
 const current = {
   totalValue: 150,

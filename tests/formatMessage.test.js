@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { formatMonitorMessages } from "../src/format-message.js";
+import { formatMonitorMessages } from "../src/formatMessage.js";
 
 const snapshot = {
   address: "0x304160997e2d06fbfc0f54a8a714dc4cdf7b9e5f",
@@ -55,10 +55,17 @@ test("formatMonitorMessages renders summary and position details", () => {
 
   assert.equal(messages.length, 1);
   assert.match(messages[0], /PM Monitor/);
+  assert.match(
+    messages[0],
+    /Polymarket Profile: https:\/\/polymarket\.com\/profile\/0x304160997e2d06fbfc0f54a8a714dc4cdf7b9e5f/,
+  );
   assert.match(messages[0], /Total Value: \$150\.00/);
-  assert.match(messages[0], /Market A/);
-  assert.match(messages[0], /Side: Yes/);
-  assert.match(messages[0], /dValue: prev1 \+\$12\.00 \| prev2 N\/A/);
+  assert.match(messages[0], /\n1\. Market A\n/);
+  assert.match(messages[0], /- Side: Yes/);
+  assert.match(messages[0], /- Avg Price: 61c/);
+  assert.match(messages[0], /- Current Price: 75c/);
+  assert.match(messages[0], /- Value Change: prev1 \+\$12\.00 \| prev2 N\/A/);
+  assert.match(messages[0], /\n\n1\. Market A/);
 });
 
 test("formatMonitorMessages splits long outputs into multiple parts", () => {

@@ -55,6 +55,11 @@ test("runMonitor performs a first run and stores one snapshot", async () => {
       return Response.json({ ok: true, result: { message_id: 1 } });
     }
 
+    if (url.includes("/sendDocument")) {
+      telegramMessages.push("document");
+      return Response.json({ ok: true, result: { message_id: 1 } });
+    }
+
     throw new Error(`Unexpected URL: ${url}`);
   };
 
@@ -71,6 +76,7 @@ test("runMonitor performs a first run and stores one snapshot", async () => {
 
   assert.equal(result.messages.length, 1);
   assert.equal(telegramMessages.length, 1);
+  assert.match(telegramMessages[0], /Polymarket Profile: https:\/\/polymarket\.com\/profile\//);
   assert.match(telegramMessages[0], /Delta vs prev1: N\/A/);
 
   const savedState = JSON.parse(await readFile(stateFilePath, "utf8"));
@@ -114,6 +120,10 @@ test("runMonitor keeps only the latest three snapshots", async () => {
       return Response.json({ ok: true, result: { message_id: 1 } });
     }
 
+    if (url.includes("/sendDocument")) {
+      return Response.json({ ok: true, result: { message_id: 1 } });
+    }
+
     throw new Error(`Unexpected URL: ${url}`);
   };
 
@@ -151,7 +161,7 @@ test("runMonitor does not persist state when Telegram send fails", async () => {
       return Response.json([]);
     }
 
-    if (url.includes("/sendMessage")) {
+    if (url.includes("/sendMessage") || url.includes("/sendDocument")) {
       return new Response(JSON.stringify({ ok: false, description: "chat not found" }), {
         status: 400,
         headers: { "content-type": "application/json" },

@@ -6,8 +6,10 @@ export function formatMonitorMessages({
   timezone,
   maxLength = DEFAULT_MAX_LENGTH,
 }) {
+  const profileUrl = `https://polymarket.com/profile/${snapshot.address}`;
   const summaryBlock = [
     "PM Monitor",
+    `Polymarket Profile: ${profileUrl}`,
     `Account: ${snapshot.username ? `@${snapshot.username}` : shortAddress(snapshot.address)} (${shortAddress(snapshot.address)})`,
     `Time: ${formatDateTime(snapshot.sentAt, timezone)}`,
     `Total Value: ${formatMoney(snapshot.totalValue)}`,
@@ -15,22 +17,25 @@ export function formatMonitorMessages({
     `Delta vs prev2: ${formatDeltaMoney(diff.summary.deltaValuePrev2)}`,
     `Active Positions: ${diff.summary.activePositions}`,
     "",
+    "",
   ].join("\n");
 
   const positionBlocks = diff.positions.map((position, index) =>
     [
       `${index + 1}. ${position.market}`,
-      `Side: ${position.outcome}`,
-      `Shares: ${formatShares(position.shares)}`,
-      `Avg/Now: ${formatCents(position.avgPrice)} -> ${formatCents(position.currentPrice)}`,
-      `Value: ${formatMoney(position.value)} | Cost: ${formatMoney(position.costBasis)}`,
-      `PnL: ${formatDeltaMoney(position.pnl)} (${formatPercent(position.pnlPercent)})`,
-      `dValue: prev1 ${formatDeltaMoney(position.deltaValuePrev1)} | prev2 ${formatDeltaMoney(position.deltaValuePrev2)}`,
-      `dPrice: prev1 ${formatDeltaCents(position.deltaPricePrev1)} | prev2 ${formatDeltaCents(position.deltaPricePrev2)}`,
-      `dShares: prev1 ${formatDeltaShares(position.deltaSharesPrev1)} | prev2 ${formatDeltaShares(position.deltaSharesPrev2)}`,
-      position.endDate ? `Ends: ${position.endDate}` : null,
-      position.mergeable ? "Mergeable: yes" : null,
-      position.negativeRisk ? "Negative risk: yes" : null,
+      `- Side: ${position.outcome}`,
+      `- Shares: ${formatShares(position.shares)}`,
+      `- Avg Price: ${formatCents(position.avgPrice)}`,
+      `- Current Price: ${formatCents(position.currentPrice)}`,
+      `- Value: ${formatMoney(position.value)}`,
+      `- Cost Basis: ${formatMoney(position.costBasis)}`,
+      `- PnL: ${formatDeltaMoney(position.pnl)} (${formatPercent(position.pnlPercent)})`,
+      `- Value Change: prev1 ${formatDeltaMoney(position.deltaValuePrev1)} | prev2 ${formatDeltaMoney(position.deltaValuePrev2)}`,
+      `- Price Change: prev1 ${formatDeltaCents(position.deltaPricePrev1)} | prev2 ${formatDeltaCents(position.deltaPricePrev2)}`,
+      `- Shares Change: prev1 ${formatDeltaShares(position.deltaSharesPrev1)} | prev2 ${formatDeltaShares(position.deltaSharesPrev2)}`,
+      position.endDate ? `- Ends: ${position.endDate}` : null,
+      position.mergeable ? "- Mergeable: yes" : null,
+      position.negativeRisk ? "- Negative risk: yes" : null,
       "",
     ]
       .filter(Boolean)
@@ -60,7 +65,7 @@ export function formatMonitorMessages({
     return parts;
   }
 
-  return parts.map((message, index) => `Part ${index + 1}/${parts.length}\n${message}`);
+  return parts.map((message, index) => `Part ${index + 1}/${parts.length}\n\n${message}`);
 }
 
 function splitBlocksIntoMessages({ summaryBlock, positionBlocks, closedBlock, maxLength }) {

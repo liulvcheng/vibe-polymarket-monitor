@@ -105,9 +105,9 @@ Expected:
 
 **Files:**
 - Create: `src/config.js`
-- Create: `src/fetch-pm.js`
+- Create: `src/fetchPm.js`
 - Create: `tests/config.test.js`
-- Create: `tests/fetch-pm.test.js`
+- Create: `tests/fetchPm.test.js`
 
 - [ ] **Step 1: Write failing config tests**
 
@@ -138,7 +138,7 @@ Add tests for:
 Run:
 
 ```bash
-npm test -- tests/fetch-pm.test.js
+npm test -- tests/fetchPm.test.js
 ```
 
 Expected:
@@ -153,7 +153,7 @@ Implement:
 - required keys: `PM_ADDRESS`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`
 - optional key: `TZ`, default `Asia/Shanghai`
 
-- [ ] **Step 4: Implement `src/fetch-pm.js`**
+- [ ] **Step 4: Implement `src/fetchPm.js`**
 
 Implement:
 
@@ -167,7 +167,7 @@ Implement:
 Run:
 
 ```bash
-npm test -- tests/config.test.js tests/fetch-pm.test.js
+npm test -- tests/config.test.js tests/fetchPm.test.js
 ```
 
 Expected:
@@ -179,7 +179,7 @@ Expected:
 Run:
 
 ```bash
-git add src/config.js src/fetch-pm.js tests/config.test.js tests/fetch-pm.test.js
+git add src/config.js src/fetchPm.js tests/config.test.js tests/fetchPm.test.js
 git commit -m "feat: add config and polymarket fetch logic"
 ```
 
@@ -190,8 +190,8 @@ Expected:
 ### Task 3: Add snapshot normalization tests and implementation
 
 **Files:**
-- Create: `src/build-snapshot.js`
-- Create: `tests/build-snapshot.test.js`
+- Create: `src/buildSnapshot.js`
+- Create: `tests/buildSnapshot.test.js`
 
 - [ ] **Step 1: Write failing snapshot tests**
 
@@ -206,14 +206,14 @@ Cover:
 Run:
 
 ```bash
-npm test -- tests/build-snapshot.test.js
+npm test -- tests/buildSnapshot.test.js
 ```
 
 Expected:
 
 - FAIL because snapshot builder does not exist yet
 
-- [ ] **Step 2: Implement `src/build-snapshot.js`**
+- [ ] **Step 2: Implement `src/buildSnapshot.js`**
 
 Implement:
 
@@ -235,7 +235,7 @@ Implement:
 Run:
 
 ```bash
-npm test -- tests/build-snapshot.test.js
+npm test -- tests/buildSnapshot.test.js
 ```
 
 Expected:
@@ -247,7 +247,7 @@ Expected:
 Run:
 
 ```bash
-git add src/build-snapshot.js tests/build-snapshot.test.js
+git add src/buildSnapshot.js tests/buildSnapshot.test.js
 git commit -m "feat: add snapshot normalization"
 ```
 
@@ -260,8 +260,8 @@ Expected:
 ### Task 4: Add diff calculation tests and implementation
 
 **Files:**
-- Create: `src/build-diff.js`
-- Create: `tests/build-diff.test.js`
+- Create: `src/buildDiff.js`
+- Create: `tests/buildDiff.test.js`
 
 - [ ] **Step 1: Write failing diff tests**
 
@@ -278,14 +278,14 @@ Cover:
 Run:
 
 ```bash
-npm test -- tests/build-diff.test.js
+npm test -- tests/buildDiff.test.js
 ```
 
 Expected:
 
 - FAIL because diff builder does not exist yet
 
-- [ ] **Step 2: Implement `src/build-diff.js`**
+- [ ] **Step 2: Implement `src/buildDiff.js`**
 
 Implement:
 
@@ -302,7 +302,7 @@ Implement:
 Run:
 
 ```bash
-npm test -- tests/build-diff.test.js
+npm test -- tests/buildDiff.test.js
 ```
 
 Expected:
@@ -314,7 +314,7 @@ Expected:
 Run:
 
 ```bash
-git add src/build-diff.js tests/build-diff.test.js
+git add src/buildDiff.js tests/buildDiff.test.js
 git commit -m "feat: add snapshot diff logic"
 ```
 
@@ -325,8 +325,8 @@ Expected:
 ### Task 5: Add Telegram message formatting tests and implementation
 
 **Files:**
-- Create: `src/format-message.js`
-- Create: `tests/format-message.test.js`
+- Create: `src/formatMessage.js`
+- Create: `tests/formatMessage.test.js`
 
 - [ ] **Step 1: Write failing formatter tests**
 
@@ -342,14 +342,14 @@ Cover:
 Run:
 
 ```bash
-npm test -- tests/format-message.test.js
+npm test -- tests/formatMessage.test.js
 ```
 
 Expected:
 
 - FAIL because formatter does not exist yet
 
-- [ ] **Step 2: Implement `src/format-message.js`**
+- [ ] **Step 2: Implement `src/formatMessage.js`**
 
 Implement:
 
@@ -363,7 +363,7 @@ Implement:
 Run:
 
 ```bash
-npm test -- tests/format-message.test.js
+npm test -- tests/formatMessage.test.js
 ```
 
 Expected:
@@ -375,7 +375,7 @@ Expected:
 Run:
 
 ```bash
-git add src/format-message.js tests/format-message.test.js
+git add src/formatMessage.js tests/formatMessage.test.js
 git commit -m "feat: add telegram message formatting"
 ```
 
@@ -388,8 +388,8 @@ Expected:
 ### Task 6: Add Telegram sender tests and implementation
 
 **Files:**
-- Create: `src/send-telegram.js`
-- Create: `tests/send-telegram.test.js`
+- Create: `src/sendTelegram.js`
+- Create: `tests/sendTelegram.test.js`
 
 - [ ] **Step 1: Write failing sender tests**
 
@@ -402,14 +402,14 @@ Cover:
 Run:
 
 ```bash
-npm test -- tests/send-telegram.test.js
+npm test -- tests/sendTelegram.test.js
 ```
 
 Expected:
 
 - FAIL because sender module does not exist yet
 
-- [ ] **Step 2: Implement `src/send-telegram.js`**
+- [ ] **Step 2: Implement `src/sendTelegram.js`**
 
 Implement:
 
@@ -422,7 +422,7 @@ Implement:
 Run:
 
 ```bash
-npm test -- tests/send-telegram.test.js
+npm test -- tests/sendTelegram.test.js
 ```
 
 Expected:
@@ -434,7 +434,7 @@ Expected:
 Run:
 
 ```bash
-git add src/send-telegram.js tests/send-telegram.test.js
+git add src/sendTelegram.js tests/sendTelegram.test.js
 git commit -m "feat: add telegram sender"
 ```
 

@@ -1,12 +1,12 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-import { buildDiff } from "./build-diff.js";
-import { buildSnapshot } from "./build-snapshot.js";
+import { buildDiff } from "./buildDiff.js";
+import { buildSnapshot } from "./buildSnapshot.js";
 import { loadConfig } from "./config.js";
-import { fetchPolymarketAccountData } from "./fetch-pm.js";
-import { formatMonitorMessages } from "./format-message.js";
-import { sendTelegramMessages } from "./send-telegram.js";
+import { fetchPolymarketAccountData } from "./fetchPm.js";
+import { formatMonitorMessages } from "./formatMessage.js";
+import { sendTelegramMessages } from "./sendTelegram.js";
 
 export async function runMonitor({ config, fetchImpl = fetch }) {
   const currentState = await loadState(config.stateFilePath);

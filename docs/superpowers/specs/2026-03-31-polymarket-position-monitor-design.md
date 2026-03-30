@@ -77,15 +77,15 @@ The implementation should stay focused and low-complexity.
   - Entry point and top-level orchestration
 - `src/config.js`
   - Read and validate environment variables
-- `src/fetch-pm.js`
+- `src/fetchPm.js`
   - Request and validate Polymarket public API responses
-- `src/build-snapshot.js`
+- `src/buildSnapshot.js`
   - Normalize API data into the internal snapshot shape
-- `src/build-diff.js`
+- `src/buildDiff.js`
   - Compare current snapshot against `prev1` and `prev2`
-- `src/format-message.js`
+- `src/formatMessage.js`
   - Render Telegram-ready text and split long output
-- `src/send-telegram.js`
+- `src/sendTelegram.js`
   - Send one or more Telegram messages
 - `tests/*.test.js`
   - Unit tests for normalization, diffs, and message formatting

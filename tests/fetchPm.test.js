@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import {
   extractProfileMetadataFromHtml,
   fetchPolymarketAccountData,
-} from "../src/fetch-pm.js";
+} from "../src/fetchPm.js";
 
 const PROFILE_HTML = `
 <!DOCTYPE html>
