@@ -47,22 +47,8 @@ const prev1 = {
   ],
 };
 
-const prev2 = {
-  totalValue: 130,
-  positions: [
-    {
-      id: "condition-1::Yes",
-      market: "Market A",
-      outcome: "Yes",
-      shares: 80,
-      currentPrice: 0.65,
-      value: 52,
-    },
-  ],
-};
-
 test("buildDiff marks first run values as unavailable", () => {
-  const diff = buildDiff({ current, prev1: null, prev2: null });
+  const diff = buildDiff({ current, prev1: null });
 
   assert.equal(diff.summary.deltaValuePrev1, null);
   assert.equal(diff.positions[0].deltaValuePrev1, null);
@@ -71,18 +57,15 @@ test("buildDiff marks first run values as unavailable", () => {
 });
 
 test("buildDiff computes portfolio and per-position deltas", () => {
-  const diff = buildDiff({ current, prev1, prev2 });
+  const diff = buildDiff({ current, prev1 });
   const marketA = diff.positions.find((position) => position.id === "condition-1::Yes");
   const marketB = diff.positions.find((position) => position.id === "condition-2::No");
 
   assert.equal(diff.summary.deltaValuePrev1, 10);
-  assert.equal(diff.summary.deltaValuePrev2, 20);
   assert.equal(marketA.deltaValuePrev1, 12);
-  assert.equal(marketA.deltaValuePrev2, 23);
   assert.equal(marketA.deltaSharesPrev1, 10);
   assert.equal(marketA.deltaPricePrev1, 0.05);
   assert.equal(marketB.deltaValuePrev1, "NEW");
-  assert.equal(marketB.deltaValuePrev2, "NEW");
   assert.equal(diff.closedSincePrev1.length, 1);
   assert.equal(diff.closedSincePrev1[0].market, "Market C");
 });

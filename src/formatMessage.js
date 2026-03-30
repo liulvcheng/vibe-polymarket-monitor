@@ -14,7 +14,6 @@ export function formatMonitorMessages({
     `Time: ${formatDateTime(snapshot.sentAt, timezone)}`,
     `Total Value: ${formatMoney(snapshot.totalValue)}`,
     `Delta vs prev1: ${formatDeltaMoney(diff.summary.deltaValuePrev1)}`,
-    `Delta vs prev2: ${formatDeltaMoney(diff.summary.deltaValuePrev2)}`,
     `Active Positions: ${diff.summary.activePositions}`,
     "",
     "",
@@ -22,24 +21,9 @@ export function formatMonitorMessages({
 
   const positionBlocks = diff.positions.map((position, index) =>
     [
-      `${index + 1}. ${position.market}`,
-      `- Side: ${position.outcome}`,
-      `- Shares: ${formatShares(position.shares)}`,
-      `- Avg Price: ${formatCents(position.avgPrice)}`,
-      `- Current Price: ${formatCents(position.currentPrice)}`,
-      `- Value: ${formatMoney(position.value)}`,
-      `- Cost Basis: ${formatMoney(position.costBasis)}`,
-      `- PnL: ${formatDeltaMoney(position.pnl)} (${formatPercent(position.pnlPercent)})`,
-      `- Value Change: prev1 ${formatDeltaMoney(position.deltaValuePrev1)} | prev2 ${formatDeltaMoney(position.deltaValuePrev2)}`,
-      `- Price Change: prev1 ${formatDeltaCents(position.deltaPricePrev1)} | prev2 ${formatDeltaCents(position.deltaPricePrev2)}`,
-      `- Shares Change: prev1 ${formatDeltaShares(position.deltaSharesPrev1)} | prev2 ${formatDeltaShares(position.deltaSharesPrev2)}`,
-      position.endDate ? `- Ends: ${position.endDate}` : null,
-      position.mergeable ? "- Mergeable: yes" : null,
-      position.negativeRisk ? "- Negative risk: yes" : null,
+      `${index + 1}. ${position.market}; ${position.outcome}; Shares ${formatShares(position.shares)}; Avg ${formatCents(position.avgPrice)}; Now ${formatCents(position.currentPrice)}; Value ${formatMoney(position.value)}; Cost ${formatMoney(position.costBasis)}; PnL ${formatDeltaMoney(position.pnl)} (${formatPercent(position.pnlPercent)}); dValue ${formatDeltaMoney(position.deltaValuePrev1)}; dPrice ${formatDeltaCents(position.deltaPricePrev1)}; dShares ${formatDeltaShares(position.deltaSharesPrev1)}${buildOptionalSuffix(position)}`,
       "",
-    ]
-      .filter(Boolean)
-      .join("\n"),
+    ].join("\n"),
   );
 
   const closedBlock =
@@ -49,7 +33,7 @@ export function formatMonitorMessages({
           "Closed or not active since prev1:",
           ...diff.closedSincePrev1.map(
             (position) =>
-              `- ${position.market} | ${position.outcome} | Last value ${formatMoney(position.value)}`,
+              `- ${position.market}; ${position.outcome}; Last Value ${formatMoney(position.value)}`,
           ),
           "",
         ];
@@ -175,6 +159,24 @@ function formatPercent(value) {
   }
 
   return `${value >= 0 ? "+" : ""}${value.toFixed(2)}%`;
+}
+
+function buildOptionalSuffix(position) {
+  const parts = [];
+
+  if (position.endDate) {
+    parts.push(`Ends ${position.endDate}`);
+  }
+
+  if (position.mergeable) {
+    parts.push("Mergeable yes");
+  }
+
+  if (position.negativeRisk) {
+    parts.push("Negative risk yes");
+  }
+
+  return parts.length === 0 ? "" : `; ${parts.join("; ")}`;
 }
 
 function shortAddress(value) {

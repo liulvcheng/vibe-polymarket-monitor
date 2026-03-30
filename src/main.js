@@ -18,7 +18,6 @@ export async function runMonitor({ config, fetchImpl = fetch }) {
   const diff = buildDiff({
     current: snapshot,
     prev1: currentState.snapshots[0] ?? null,
-    prev2: currentState.snapshots[1] ?? null,
   });
   const messages = formatMonitorMessages({
     snapshot,
@@ -35,7 +34,7 @@ export async function runMonitor({ config, fetchImpl = fetch }) {
 
   const nextState = {
     address: config.pmAddress,
-    snapshots: [snapshot, ...currentState.snapshots].slice(0, 3),
+    snapshots: [snapshot],
   };
 
   await saveState(config.stateFilePath, nextState);

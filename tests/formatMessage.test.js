@@ -29,17 +29,13 @@ const diff = {
   summary: {
     activePositions: 1,
     deltaValuePrev1: 10,
-    deltaValuePrev2: null,
   },
   positions: [
     {
       ...snapshot.positions[0],
       deltaValuePrev1: 12,
-      deltaValuePrev2: null,
       deltaPricePrev1: 0.05,
-      deltaPricePrev2: null,
       deltaSharesPrev1: 10,
-      deltaSharesPrev2: null,
     },
   ],
   closedSincePrev1: [],
@@ -60,11 +56,9 @@ test("formatMonitorMessages renders summary and position details", () => {
     /Polymarket Profile: https:\/\/polymarket\.com\/profile\/0x304160997e2d06fbfc0f54a8a714dc4cdf7b9e5f/,
   );
   assert.match(messages[0], /Total Value: \$150\.00/);
-  assert.match(messages[0], /\n1\. Market A\n/);
-  assert.match(messages[0], /- Side: Yes/);
-  assert.match(messages[0], /- Avg Price: 61c/);
-  assert.match(messages[0], /- Current Price: 75c/);
-  assert.match(messages[0], /- Value Change: prev1 \+\$12\.00 \| prev2 N\/A/);
+  assert.doesNotMatch(messages[0], /Delta vs prev2/);
+  assert.match(messages[0], /\n1\. Market A; Yes; Shares 100; Avg 61c; Now 75c; Value \$75\.00; Cost \$61\.00/);
+  assert.match(messages[0], /PnL \+\$14\.00 \(\+22\.95%\); dValue \+\$12\.00; dPrice \+5c; dShares \+10; Ends 2026-12-31/);
   assert.match(messages[0], /\n\n1\. Market A/);
 });
 

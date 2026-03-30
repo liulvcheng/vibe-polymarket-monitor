@@ -79,7 +79,7 @@ test("runMonitor performs a first run and stores one snapshot", async () => {
   assert.equal(savedState.snapshots[0].positions[0].market, "Market A");
 });
 
-test("runMonitor keeps only the latest three snapshots", async () => {
+test("runMonitor keeps only the latest snapshot", async () => {
   const tempDir = await mkdtemp(path.join(os.tmpdir(), "pm-monitor-"));
   const stateFilePath = path.join(tempDir, "state.json");
   let runNumber = 0;
@@ -132,7 +132,8 @@ test("runMonitor keeps only the latest three snapshots", async () => {
   }
 
   const savedState = JSON.parse(await readFile(stateFilePath, "utf8"));
-  assert.equal(savedState.snapshots.length, 3);
+  assert.equal(savedState.snapshots.length, 1);
+  assert.equal(savedState.snapshots[0].totalValue, 103);
 });
 
 test("runMonitor does not persist state when Telegram send fails", async () => {

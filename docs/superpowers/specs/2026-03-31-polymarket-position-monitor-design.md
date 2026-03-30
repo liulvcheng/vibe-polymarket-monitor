@@ -1,5 +1,7 @@
 # Polymarket Position Monitor Design
 
+> Note: the current implementation has been simplified from this initial design. It now compares only against `prev1`, stores only the latest successful snapshot, and formats each position as a single semicolon-delimited line. See `docs/technical-architecture.zh-CN.md` for the latest behavior.
+
 ## Goal
 
 Build a small JavaScript-based monitor that runs on GitHub Actions every 3 hours, reads the user's public Polymarket positions, and pushes a clear Telegram summary of:
