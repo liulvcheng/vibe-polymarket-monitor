@@ -1,6 +1,6 @@
 # Polymarket Position Monitor Design
 
-> Note: the current implementation has been simplified from this initial design. It now compares only against `prev1`, stores only the latest successful snapshot, and formats each position as a single semicolon-delimited line. See `docs/technical-architecture.zh-CN.md` for the latest behavior.
+> Note: the current implementation has been simplified from this initial design. It now compares only against `prev1`, stores only the latest successful snapshot, and formats each position as a numbered multi-line block with up to four semicolon-delimited fields per line. See `docs/technical-architecture.zh-CN.md` for the latest behavior.
 
 ## Goal
 

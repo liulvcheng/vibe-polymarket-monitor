@@ -21,7 +21,10 @@ export function formatMonitorMessages({
 
   const positionBlocks = diff.positions.map((position, index) =>
     [
-      `${index + 1}. ${position.market}; ${position.outcome}; Shares ${formatShares(position.shares)}; Avg ${formatCents(position.avgPrice)}; Now ${formatCents(position.currentPrice)}; Value ${formatMoney(position.value)}; Cost ${formatMoney(position.costBasis)}; PnL ${formatDeltaMoney(position.pnl)} (${formatPercent(position.pnlPercent)}); dValue ${formatDeltaMoney(position.deltaValuePrev1)}; dPrice ${formatDeltaCents(position.deltaPricePrev1)}; dShares ${formatDeltaShares(position.deltaSharesPrev1)}${buildOptionalSuffix(position)}`,
+      `${index + 1}. ${position.market}; ${position.outcome}; Shares ${formatShares(position.shares)}; Avg ${formatCents(position.avgPrice)}`,
+      `Now ${formatCents(position.currentPrice)}; Value ${formatMoney(position.value)}; Cost ${formatMoney(position.costBasis)}; PnL ${formatDeltaMoney(position.pnl)} (${formatPercent(position.pnlPercent)})`,
+      `dValue ${formatDeltaMoney(position.deltaValuePrev1)}; dPrice ${formatDeltaCents(position.deltaPricePrev1)}; dShares ${formatDeltaShares(position.deltaSharesPrev1)}${buildOptionalSuffix(position, 1)}`,
+      "",
       "",
     ].join("\n"),
   );
@@ -161,7 +164,7 @@ function formatPercent(value) {
   return `${value >= 0 ? "+" : ""}${value.toFixed(2)}%`;
 }
 
-function buildOptionalSuffix(position) {
+function buildOptionalSuffix(position, fieldsInLine = 0) {
   const parts = [];
 
   if (position.endDate) {
@@ -176,7 +179,15 @@ function buildOptionalSuffix(position) {
     parts.push("Negative risk yes");
   }
 
-  return parts.length === 0 ? "" : `; ${parts.join("; ")}`;
+  if (parts.length === 0) {
+    return "";
+  }
+
+  if (fieldsInLine >= 4) {
+    return `\n${parts.join("; ")}`;
+  }
+
+  return `; ${parts.join("; ")}`;
 }
 
 function shortAddress(value) {

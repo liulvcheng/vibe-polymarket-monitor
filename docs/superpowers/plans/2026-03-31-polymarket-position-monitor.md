@@ -1,6 +1,6 @@
 # Polymarket Position Monitor Implementation Plan
 
-> Note: the shipped implementation has since been simplified. It now compares only against `prev1`, stores only the latest successful snapshot, and uses single-line position rendering in Telegram. See `docs/technical-architecture.zh-CN.md` for the latest behavior.
+> Note: the shipped implementation has since been simplified. It now compares only against `prev1`, stores only the latest successful snapshot, and uses numbered multi-line position rendering in Telegram with up to four semicolon-delimited fields per line. See `docs/technical-architecture.zh-CN.md` for the latest behavior.
 
 > **For agentic workers:** REQUIRED: Use superpowers:subagent-driven-development (if subagents available) or superpowers:executing-plans to implement this plan. Steps use checkbox (`- [ ]`) syntax for tracking.
 

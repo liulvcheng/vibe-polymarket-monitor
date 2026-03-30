@@ -57,9 +57,46 @@ test("formatMonitorMessages renders summary and position details", () => {
   );
   assert.match(messages[0], /Total Value: \$150\.00/);
   assert.doesNotMatch(messages[0], /Delta vs prev2/);
-  assert.match(messages[0], /\n1\. Market A; Yes; Shares 100; Avg 61c; Now 75c; Value \$75\.00; Cost \$61\.00/);
-  assert.match(messages[0], /PnL \+\$14\.00 \(\+22\.95%\); dValue \+\$12\.00; dPrice \+5c; dShares \+10; Ends 2026-12-31/);
-  assert.match(messages[0], /\n\n1\. Market A/);
+  assert.match(messages[0], /\n1\. Market A; Yes; Shares 100; Avg 61c\n/);
+  assert.match(messages[0], /Now 75c; Value \$75\.00; Cost \$61\.00; PnL \+\$14\.00 \(\+22\.95%\)\n/);
+  assert.match(messages[0], /dValue \+\$12\.00; dPrice \+5c; dShares \+10; Ends 2026-12-31/);
+});
+
+test("formatMonitorMessages separates numbered position blocks with a blank line", () => {
+  const messages = formatMonitorMessages({
+    snapshot: {
+      ...snapshot,
+      positions: [
+        snapshot.positions[0],
+        {
+          ...snapshot.positions[0],
+          id: "condition-2::No",
+          market: "Market B",
+          outcome: "No",
+        },
+      ],
+    },
+    diff: {
+      ...diff,
+      summary: {
+        ...diff.summary,
+        activePositions: 2,
+      },
+      positions: [
+        diff.positions[0],
+        {
+          ...diff.positions[0],
+          id: "condition-2::No",
+          market: "Market B",
+          outcome: "No",
+        },
+      ],
+    },
+    timezone: "Asia/Shanghai",
+    maxLength: 3500,
+  });
+
+  assert.match(messages[0], /Ends 2026-12-31\n\n2\. Market B; No; Shares 100; Avg 61c/);
 });
 
 test("formatMonitorMessages splits long outputs into multiple parts", () => {
