@@ -55,11 +55,6 @@ test("runMonitor performs a first run and stores one snapshot", async () => {
       return Response.json({ ok: true, result: { message_id: 1 } });
     }
 
-    if (url.includes("/sendDocument")) {
-      telegramMessages.push("document");
-      return Response.json({ ok: true, result: { message_id: 1 } });
-    }
-
     throw new Error(`Unexpected URL: ${url}`);
   };
 
@@ -120,10 +115,6 @@ test("runMonitor keeps only the latest three snapshots", async () => {
       return Response.json({ ok: true, result: { message_id: 1 } });
     }
 
-    if (url.includes("/sendDocument")) {
-      return Response.json({ ok: true, result: { message_id: 1 } });
-    }
-
     throw new Error(`Unexpected URL: ${url}`);
   };
 
@@ -161,7 +152,7 @@ test("runMonitor does not persist state when Telegram send fails", async () => {
       return Response.json([]);
     }
 
-    if (url.includes("/sendMessage") || url.includes("/sendDocument")) {
+    if (url.includes("/sendMessage")) {
       return new Response(JSON.stringify({ ok: false, description: "chat not found" }), {
         status: 400,
         headers: { "content-type": "application/json" },
