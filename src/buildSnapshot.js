@@ -10,7 +10,7 @@ export function buildSnapshot({
 }) {
   const normalizedPositions = positions
     .map((position) => normalizePosition(position))
-    .filter((position) => isDisplayablePosition(position, fetchedAt))
+    .filter(isDisplayablePosition)
     .sort((left, right) => right.value - left.value);
 
   return {
@@ -27,6 +27,7 @@ export function buildSnapshot({
 }
 
 export function buildPositionKey(rawPosition) {
+  // Prefer condition+outcome so the same market side matches across snapshots.
   if (rawPosition.conditionId && rawPosition.outcome) {
     return `${rawPosition.conditionId}::${rawPosition.outcome}`;
   }
@@ -71,7 +72,7 @@ function normalizePosition(rawPosition) {
   };
 }
 
-function isDisplayablePosition(position, fetchedAt) {
+function isDisplayablePosition(position) {
   if (roundQuantity(position.shares) <= 0) {
     return false;
   }
@@ -83,6 +84,7 @@ function isDisplayablePosition(position, fetchedAt) {
   if (position.redeemable) {
     return false;
   }
+
   return true;
 }
 

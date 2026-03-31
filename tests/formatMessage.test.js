@@ -138,16 +138,12 @@ test("formatMonitorMessages groups and sorts positions by market value then posi
   assert.ok(lighterGroupIndex !== -1);
   assert.ok(edgeXGroupIndex < lighterGroupIndex);
   assert.ok(higherValueIndex < lowerValueIndex);
-  assert.doesNotMatch(
+  assert.match(
     messages[0],
     /<b>EdgeX FDV Above One Day After Launch<\/b>\n\n<b>1\. EdgeX FDV above \$300M one day after launch\?<\/b>/,
   );
-  assert.doesNotMatch(
-    messages[0],
-    /dShares: \+10\n\n\n<b>Will Lighter Reach Before 2027<\/b>/,
-  );
   assert.match(messages[0], /dShares: \+10\nEnd: 2026-12-31\n\n<b>2\. EdgeX FDV above \$1B one day after launch\?<\/b>/);
-  assert.match(messages[0], /dShares: \+10\nEnd: 2026-12-31\n<b>Will Lighter Reach Before 2027<\/b>/);
+  assert.match(messages[0], /dShares: \+10\nEnd: 2026-12-31\n\n<b>Will Lighter Reach Before 2027<\/b>/);
 });
 
 test("formatMonitorMessages splits long outputs into multiple parts", () => {

@@ -58,7 +58,10 @@ function buildGroupedBlocks(positions) {
   return groups.map((group) =>
     [
       `<b>${escapeHtml(group.title)}</b>`,
+      "",
+      // Keep a blank line after the market title and between positions for scanability.
       ...group.positions.map((position, index) => buildPositionBlock(position, index + 1)),
+      "",
     ].join("\n"),
   );
 }
@@ -67,6 +70,7 @@ function groupPositions(positions) {
   const groups = new Map();
 
   for (const position of positions) {
+    // Group related markets under the event when Polymarket provides one.
     const key = position.eventSlug ?? position.slug ?? position.market;
     const title = buildGroupTitle(position);
     const existing = groups.get(key);
@@ -136,6 +140,7 @@ function splitBlocksIntoMessages({ summaryBlock, positionBlocks, closedBlock, ma
   let current = summaryBlock;
 
   for (const block of positionBlocks) {
+    // Split only at block boundaries so Telegram parts stay readable.
     if ((current + block).length > maxLength && current !== summaryBlock) {
       messages.push(current.trimEnd());
       current = block;
@@ -249,6 +254,7 @@ function shortAddress(value) {
 }
 
 function titleCaseSlug(value) {
+  // Preserve project-specific casing for names that look wrong in generic title case.
   const tokenMap = new Map([
     ["edgex", "EdgeX"],
     ["megaeth", "MegaETH"],
