@@ -3,7 +3,8 @@ import assert from "node:assert/strict";
 
 import { formatMonitorMessages } from "../src/formatMessage.js";
 
-// Keep one compact fixture and override only the fields each formatting case cares about.
+// 格式化测试复用一个小 fixture，再按场景覆写少数字段。
+// 这样既能保证可读性，也能把注意力集中在排版和排序规则上。
 const snapshot = {
   address: "0x304160997e2d06fbfc0f54a8a714dc4cdf7b9e5f",
   username: "0utr1",

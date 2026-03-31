@@ -7,7 +7,8 @@ import {
 } from "../src/fetchPm.js";
 import { buildAccountingSnapshotZip } from "./support/accountingSnapshot.js";
 
-// Use a minimal profile shell because the parser only needs the embedded NEXT_DATA payload.
+// profile 解析器只关心 __NEXT_DATA__ 里的 proxyAddress 和 username。
+// 测试里保留最小 HTML 结构，避免 fixture 噪音太大。
 const PROFILE_HTML = `
 <!DOCTYPE html>
 <html>

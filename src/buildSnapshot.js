@@ -1,3 +1,5 @@
+// 把 Polymarket 原始仓位响应标准化成内部快照结构。
+// 这里顺带完成过滤和排序，避免格式化阶段再重复判断。
 export function buildSnapshot({
   address,
   proxyAddress,
@@ -27,7 +29,8 @@ export function buildSnapshot({
 }
 
 export function buildPositionKey(rawPosition) {
-  // Prefer condition+outcome so the same market side matches across snapshots.
+  // 优先使用 conditionId + outcome 作为稳定主键。
+  // 这样同一市场的 Yes/No 两侧能在前后快照中稳定对应。
   if (rawPosition.conditionId && rawPosition.outcome) {
     return `${rawPosition.conditionId}::${rawPosition.outcome}`;
   }
@@ -73,6 +76,7 @@ function normalizePosition(rawPosition) {
 }
 
 function isDisplayablePosition(position) {
+  // 展示层只保留仍然有实际持仓价值、且尚未 redeem 的仓位。
   if (roundQuantity(position.shares) <= 0) {
     return false;
   }

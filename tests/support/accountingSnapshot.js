@@ -1,6 +1,7 @@
 import { strToU8, zipSync } from "fflate";
 
-// Build an in-memory zip that matches the accounting snapshot shape used by fetchPm tests.
+// 生成一个内存中的 accounting snapshot zip。
+// fetchPm 测试通过它模拟 Polymarket 下载回来的压缩包结构。
 export function buildAccountingSnapshotZip({
   equityRows = [],
   positionRows = [],

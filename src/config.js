@@ -1,4 +1,5 @@
-// Load and validate the runtime settings required by the monitor.
+// 读取并校验运行监控所需的环境变量。
+// 这里集中做默认值和格式检查，后续模块可以直接依赖规范化后的配置。
 export function loadConfig(env = process.env) {
   const pmAddress = requireString(env.PM_ADDRESS, "PM_ADDRESS").toLowerCase();
   const telegramBotToken = requireString(

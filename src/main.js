@@ -8,7 +8,8 @@ import { fetchPolymarketAccountData } from "./fetchPm.js";
 import { formatMonitorMessages } from "./formatMessage.js";
 import { sendTelegramMessages } from "./sendTelegram.js";
 
-// Run one full monitor cycle: load state, fetch data, diff, send, then persist.
+// 执行一次完整监控流程：
+// 读取状态 -> 拉取 Polymarket -> 构建快照 -> 计算 diff -> 发送 Telegram -> 持久化最新状态。
 export async function runMonitor({ config, fetchImpl = fetch }) {
   const currentState = await loadState(config.stateFilePath);
   const accountData = await fetchPolymarketAccountData({
@@ -74,7 +75,7 @@ async function loadState(stateFilePath) {
       snapshots: Array.isArray(parsed.snapshots) ? parsed.snapshots : [],
     };
   } catch (error) {
-    // First run starts with an empty state file.
+    // 首次运行还没有状态文件时，按空状态启动即可。
     if (error.code === "ENOENT") {
       return {
         address: "",

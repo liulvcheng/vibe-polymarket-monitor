@@ -1,4 +1,5 @@
-// Compare the latest snapshot with prev1 and attach per-position deltas.
+// 只比较 current 和 prev1。
+// 输出同时包含总仓位变化、每个仓位的变化，以及自上次以来消失的仓位列表。
 export function buildDiff({ current, prev1 }) {
   const prev1Map = buildPositionMap(prev1?.positions ?? []);
   const positions = current.positions.map((position) =>

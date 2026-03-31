@@ -1,4 +1,4 @@
-// Send each rendered message part sequentially so Telegram preserves ordering.
+// 按顺序逐条发送消息分片，保证 Telegram 中的阅读顺序稳定。
 export async function sendTelegramMessages({
   token,
   chatId,

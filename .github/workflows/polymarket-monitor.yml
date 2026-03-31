@@ -3,7 +3,7 @@ name: Polymarket Monitor
 on:
   workflow_dispatch:
   schedule:
-    # Runs every three hours in UTC, which maps to the intended Beijing-time cadence.
+    # 这里用 UTC 表达每 3 小时一次的定时，换算后对应文档里的北京时间节奏。
     - cron: "0 1,4,7,10,13,16,19,22 * * *"
 
 permissions:
@@ -37,7 +37,7 @@ jobs:
       - name: Restore monitor state
         shell: bash
         run: |
-          # Default to an empty state and overwrite it only when monitor-state exists.
+          # 先写入一个空状态文件，只有 monitor-state 分支存在时才用远端状态覆盖。
           mkdir -p state
           echo '{"address":"","snapshots":[]}' > state/state.json
           set +e
@@ -64,7 +64,7 @@ jobs:
         if: success()
         shell: bash
         run: |
-          # Write the new snapshot only after Telegram send succeeds.
+          # 只有消息发送成功后才回写 state，避免失败运行污染下一次 diff 基线。
           cp state/state.json "$RUNNER_TEMP/state.json"
           set +e
           git ls-remote --exit-code origin refs/heads/monitor-state >/dev/null 2>&1

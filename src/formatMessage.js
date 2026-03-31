@@ -1,5 +1,7 @@
 const DEFAULT_MAX_LENGTH = 3500;
 
+// 把内部快照和 diff 渲染成 Telegram HTML 消息。
+// 格式化阶段负责分组、排序、空行排版，以及超长消息拆分。
 export function formatMonitorMessages({
   snapshot,
   diff,
@@ -59,7 +61,7 @@ function buildGroupedBlocks(positions) {
     [
       `<b>${escapeHtml(group.title)}</b>`,
       "",
-      // Keep a blank line after the market title and between positions for scanability.
+      // 市场标题后保留一个空行；每个仓位块自身末尾也保留空行，方便在手机上快速扫读。
       ...group.positions.map((position, index) => buildPositionBlock(position, index + 1)),
       "",
     ].join("\n"),
@@ -70,7 +72,8 @@ function groupPositions(positions) {
   const groups = new Map();
 
   for (const position of positions) {
-    // Group related markets under the event when Polymarket provides one.
+    // 优先按 eventSlug 分组，这样同一事件下的多个预测会折叠到同一市场块里。
+    // 如果没有 eventSlug，再退回 slug 或市场标题。
     const key = position.eventSlug ?? position.slug ?? position.market;
     const title = buildGroupTitle(position);
     const existing = groups.get(key);
@@ -140,7 +143,7 @@ function splitBlocksIntoMessages({ summaryBlock, positionBlocks, closedBlock, ma
   let current = summaryBlock;
 
   for (const block of positionBlocks) {
-    // Split only at block boundaries so Telegram parts stay readable.
+    // 只在完整块之间拆分，避免把一个市场或一个仓位截断到两条 Telegram 消息里。
     if ((current + block).length > maxLength && current !== summaryBlock) {
       messages.push(current.trimEnd());
       current = block;
@@ -254,7 +257,7 @@ function shortAddress(value) {
 }
 
 function titleCaseSlug(value) {
-  // Preserve project-specific casing for names that look wrong in generic title case.
+  // 通用 title case 会把 EdgeX、MegaETH、FDV 这类词打坏，这里单独保留项目内常见写法。
   const tokenMap = new Map([
     ["edgex", "EdgeX"],
     ["megaeth", "MegaETH"],

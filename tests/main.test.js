@@ -7,7 +7,8 @@ import { mkdtemp, readFile } from "node:fs/promises";
 import { runMonitor } from "../src/main.js";
 import { buildAccountingSnapshotZip } from "./support/accountingSnapshot.js";
 
-// End-to-end tests exercise the orchestration layer with a fully stubbed network.
+// 这些测试覆盖主流程编排，网络全部替换成 stub。
+// 目标是验证“抓取 -> 格式化 -> 发送 -> 持久化”这个链路，而不是某个单独模块。
 const PROFILE_HTML = `
 <!DOCTYPE html>
 <html>

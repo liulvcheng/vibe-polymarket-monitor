@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 
 import { sendTelegramMessages } from "../src/sendTelegram.js";
 
-// Telegram tests stub fetch so we can assert the exact payload sent to the API.
+// Telegram 测试全部用 fetch stub，直接验证请求 payload，避免依赖真实网络。
 test("sendTelegramMessages posts a single text message when content fits", async () => {
   const sentRequests = [];
 

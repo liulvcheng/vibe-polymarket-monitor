@@ -4,7 +4,8 @@ const DEFAULT_TIMEOUT_MS = 15_000;
 const DEFAULT_RETRY_COUNT = 1;
 const DEFAULT_RETRY_DELAY_MS = 750;
 
-// Fetch the public Polymarket profile, resolve the proxy wallet, then load balances and positions.
+// 拉取 Polymarket 公开数据的统一入口。
+// 先从 profile 页面解析 proxyAddress，再并行抓取仓位列表和 accounting snapshot。
 export async function fetchPolymarketAccountData({
   address,
   fetchImpl = fetch,
@@ -67,7 +68,7 @@ async function fetchAllPositions({
   const positions = [];
 
   while (true) {
-    // The positions API is paginated; keep reading until the page comes back short.
+    // positions 接口分页返回，直到某一页不足 limit 才说明已经取完。
     const page = await fetchJsonWithRetry({
       url:
         "https://data-api.polymarket.com/positions" +
@@ -167,6 +168,7 @@ async function fetchWithRetry({
         throw error;
       }
 
+      // Polymarket 和 Telegram 的公网请求偶发抖动较多，这里只做一次轻量重试。
       await delay(retryDelayMs);
     } finally {
       clearTimeout(timeout);
@@ -204,7 +206,7 @@ function parseAccountingSnapshotZip(buffer) {
 
   const equityRow = equityRows
     .slice()
-    // When multiple snapshots are present, use the newest valuation row.
+    // accounting zip 里可能带多行估值记录，统一取 valuationTime 最新的一行。
     .sort((left, right) => {
       const leftTime = Date.parse(left.valuationTime ?? "");
       const rightTime = Date.parse(right.valuationTime ?? "");

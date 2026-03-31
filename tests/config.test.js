@@ -3,7 +3,8 @@ import assert from "node:assert/strict";
 
 import { loadConfig } from "../src/config.js";
 
-// Config tests cover validation and defaulting because the app fails fast on bad env.
+// 配置层是整个程序的前置校验点。
+// 这些测试覆盖默认值、必填项和地址格式，保证启动失败时错误足够明确。
 test("loadConfig returns normalized required settings", () => {
   const config = loadConfig({
     PM_ADDRESS: "0x304160997e2d06fbfc0f54a8a714dc4cdf7b9e5f",
