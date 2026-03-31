@@ -230,7 +230,7 @@ test("fetchPolymarketAccountData retries once on transient fetch failures", asyn
   assert.equal(attempts, 4);
 });
 
-test("fetchPolymarketAccountData throws on malformed accounting payloads", async () => {
+test("fetchPolymarketAccountData throws on empty accounting payloads", async () => {
   const fetchImpl = async (url) => {
     if (url.includes("/profile/")) {
       return new Response(PROFILE_HTML, {
@@ -264,6 +264,6 @@ test("fetchPolymarketAccountData throws on malformed accounting payloads", async
         address: "0x304160997e2d06fbfc0f54a8a714dc4cdf7b9e5f",
         fetchImpl,
       }),
-    /Polymarket accounting snapshot must contain exactly one equity row/,
+    /Polymarket accounting snapshot must contain at least one equity row/,
   );
 });

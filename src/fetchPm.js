@@ -196,11 +196,23 @@ function parseAccountingSnapshotZip(buffer) {
   }
 
   const equityRows = parseCsv(strFromU8(equityCsv));
-  if (equityRows.length !== 1) {
-    throw new Error("Polymarket accounting snapshot must contain exactly one equity row");
+  if (equityRows.length === 0) {
+    throw new Error("Polymarket accounting snapshot must contain at least one equity row");
   }
 
-  const [equityRow] = equityRows;
+  const equityRow = equityRows
+    .slice()
+    .sort((left, right) => {
+      const leftTime = Date.parse(left.valuationTime ?? "");
+      const rightTime = Date.parse(right.valuationTime ?? "");
+
+      if (Number.isNaN(leftTime) || Number.isNaN(rightTime)) {
+        return 0;
+      }
+
+      return rightTime - leftTime;
+    })[0];
+
   return {
     cashBalance: roundCurrency(toNumber(equityRow.cashBalance)),
     positionsValue: roundCurrency(toNumber(equityRow.positionsValue)),
