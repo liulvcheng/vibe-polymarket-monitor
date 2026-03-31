@@ -3,18 +3,26 @@ export function buildSnapshot({
   proxyAddress,
   username,
   fetchedAt,
-  totalValue,
+  cashBalance,
+  positionsValue,
+  totalEquity,
   positions,
 }) {
+  const normalizedPositions = positions
+    .map((position) => normalizePosition(position))
+    .filter((position) => isDisplayablePosition(position, fetchedAt))
+    .sort((left, right) => right.value - left.value);
+
   return {
     address,
     proxyAddress,
     username,
     sentAt: fetchedAt,
-    totalValue: roundCurrency(totalValue),
-    positions: positions
-      .map((position) => normalizePosition(position))
-      .sort((left, right) => right.value - left.value),
+    cashBalance: roundCurrency(cashBalance),
+    positionsValue: roundCurrency(positionsValue),
+    totalEquity: roundCurrency(totalEquity),
+    totalValue: roundCurrency(normalizedPositions.reduce((sum, position) => sum + position.value, 0)),
+    positions: normalizedPositions,
   };
 }
 
@@ -57,9 +65,32 @@ function normalizePosition(rawPosition) {
     pnl,
     pnlPercent,
     endDate: rawPosition.endDate ?? null,
+    redeemable: Boolean(rawPosition.redeemable),
     mergeable: Boolean(rawPosition.mergeable),
     negativeRisk: Boolean(rawPosition.negativeRisk),
   };
+}
+
+function isDisplayablePosition(position, fetchedAt) {
+  if (position.shares <= 0) {
+    return false;
+  }
+
+  if (position.redeemable) {
+    return false;
+  }
+
+  if (!position.endDate) {
+    return true;
+  }
+
+  const endTime = Date.parse(position.endDate);
+  const fetchedTime = Date.parse(fetchedAt);
+  if (Number.isNaN(endTime) || Number.isNaN(fetchedTime)) {
+    return true;
+  }
+
+  return endTime > fetchedTime;
 }
 
 function computePnlPercent(costBasis, pnl, fallback) {

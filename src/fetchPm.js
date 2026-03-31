@@ -1,3 +1,5 @@
+import { unzipSync, strFromU8 } from "fflate";
+
 const DEFAULT_TIMEOUT_MS = 15_000;
 const DEFAULT_RETRY_COUNT = 1;
 const DEFAULT_RETRY_DELAY_MS = 750;
@@ -19,9 +21,9 @@ export async function fetchPolymarketAccountData({
     accept: "text/html",
   });
   const { proxyAddress, username } = extractProfileMetadataFromHtml(profileHtml);
-  const [valuePayload, positionsPayload] = await Promise.all([
-    fetchJsonWithRetry({
-      url: `https://data-api.polymarket.com/value?user=${proxyAddress}`,
+  const [accountingSnapshot, positionsPayload] = await Promise.all([
+    fetchAccountingSnapshotWithRetry({
+      url: `https://data-api.polymarket.com/v1/accounting/snapshot?user=${address}`,
       fetchImpl,
       timeoutMs,
       retryCount,
@@ -36,10 +38,6 @@ export async function fetchPolymarketAccountData({
     }),
   ]);
 
-  if (!Array.isArray(valuePayload) || valuePayload.length === 0) {
-    throw new Error("Polymarket value payload must be a non-empty array");
-  }
-
   if (!Array.isArray(positionsPayload)) {
     throw new Error("Polymarket positions payload must be an array");
   }
@@ -49,7 +47,9 @@ export async function fetchPolymarketAccountData({
     proxyAddress,
     username,
     fetchedAt,
-    totalValue: toNumber(valuePayload[0]?.value),
+    cashBalance: accountingSnapshot.cashBalance,
+    positionsValue: accountingSnapshot.positionsValue,
+    totalEquity: accountingSnapshot.equity,
     positions: positionsPayload,
   };
 }
@@ -119,6 +119,17 @@ async function fetchJsonWithRetry(options) {
   });
 }
 
+async function fetchAccountingSnapshotWithRetry(options) {
+  return fetchWithRetry({
+    ...options,
+    accept: "application/zip",
+    parse: async (response) => {
+      const buffer = new Uint8Array(await response.arrayBuffer());
+      return parseAccountingSnapshotZip(buffer);
+    },
+  });
+}
+
 async function fetchWithRetry({
   url,
   fetchImpl,
@@ -174,4 +185,41 @@ function toNumber(value) {
   }
 
   return number;
+}
+
+function parseAccountingSnapshotZip(buffer) {
+  const files = unzipSync(buffer);
+  const equityCsv = files["equity.csv"];
+
+  if (!equityCsv) {
+    throw new Error("Polymarket accounting snapshot is missing equity.csv");
+  }
+
+  const equityRows = parseCsv(strFromU8(equityCsv));
+  if (equityRows.length !== 1) {
+    throw new Error("Polymarket accounting snapshot must contain exactly one equity row");
+  }
+
+  const [equityRow] = equityRows;
+  return {
+    cashBalance: roundCurrency(toNumber(equityRow.cashBalance)),
+    positionsValue: roundCurrency(toNumber(equityRow.positionsValue)),
+    equity: roundCurrency(toNumber(equityRow.equity)),
+  };
+}
+
+function parseCsv(content) {
+  const [headerLine, ...dataLines] = content.trim().split(/\r?\n/);
+  const headers = headerLine.split(",");
+
+  return dataLines
+    .filter(Boolean)
+    .map((line) => {
+      const values = line.split(",");
+      return Object.fromEntries(headers.map((header, index) => [header, values[index] ?? ""]));
+    });
+}
+
+function roundCurrency(value) {
+  return Math.round(Number(value) * 100) / 100;
 }

@@ -9,11 +9,14 @@ export function formatMonitorMessages({
   const profileUrl = `https://polymarket.com/profile/${snapshot.address}`;
   const summaryBlock = [
     "PM Monitor",
-    `Polymarket Profile: ${profileUrl}`,
+    "Polymarket Profile:",
+    profileUrl,
     `Account: ${snapshot.username ? `@${snapshot.username}` : shortAddress(snapshot.address)} (${shortAddress(snapshot.address)})`,
     `Time: ${formatDateTime(snapshot.sentAt, timezone)}`,
-    `Total Value: ${formatMoney(snapshot.totalValue)}`,
-    `Delta vs prev1: ${formatDeltaMoney(diff.summary.deltaValuePrev1)}`,
+    `Open Positions Value: ${formatMoney(snapshot.totalValue)}`,
+    `Available Cash: ${formatMoney(snapshot.cashBalance)}`,
+    `Total Equity: ${formatMoney(snapshot.totalEquity)}`,
+    `Open Value Delta vs prev1: ${formatDeltaMoney(diff.summary.deltaValuePrev1)}`,
     `Active Positions: ${diff.summary.activePositions}`,
     "",
     "",
@@ -21,8 +24,9 @@ export function formatMonitorMessages({
 
   const positionBlocks = diff.positions.map((position, index) =>
     [
-      `${index + 1}. ${position.market}; ${position.outcome}; Shares ${formatShares(position.shares)}; Avg ${formatCents(position.avgPrice)}`,
-      `Now ${formatCents(position.currentPrice)}; Value ${formatMoney(position.value)}; Cost ${formatMoney(position.costBasis)}; PnL ${formatDeltaMoney(position.pnl)} (${formatPercent(position.pnlPercent)})`,
+      `${index + 1}. ${position.market}`,
+      `Side: ${position.outcome}; Shares: ${formatShares(position.shares)}; Avg: ${formatCents(position.avgPrice)}; Now: ${formatCents(position.currentPrice)}`,
+      `Value: ${formatMoney(position.value)}; Cost: ${formatMoney(position.costBasis)}; PnL: ${formatDeltaMoney(position.pnl)} (${formatPercent(position.pnlPercent)})`,
       `dValue ${formatDeltaMoney(position.deltaValuePrev1)}; dPrice ${formatDeltaCents(position.deltaPricePrev1)}; dShares ${formatDeltaShares(position.deltaSharesPrev1)}${buildOptionalSuffix(position, 1)}`,
       "",
       "",
@@ -168,15 +172,15 @@ function buildOptionalSuffix(position, fieldsInLine = 0) {
   const parts = [];
 
   if (position.endDate) {
-    parts.push(`Ends ${position.endDate}`);
+    parts.push(`End: ${position.endDate}`);
   }
 
   if (position.mergeable) {
-    parts.push("Mergeable yes");
+    parts.push("Mergeable: yes");
   }
 
   if (position.negativeRisk) {
-    parts.push("Negative risk yes");
+    parts.push("Negative risk: yes");
   }
 
   if (parts.length === 0) {

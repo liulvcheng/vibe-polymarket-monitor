@@ -5,6 +5,7 @@ import {
   extractProfileMetadataFromHtml,
   fetchPolymarketAccountData,
 } from "../src/fetchPm.js";
+import { buildAccountingSnapshotZip } from "./support/accountingSnapshot.js";
 
 const PROFILE_HTML = `
 <!DOCTYPE html>
@@ -52,13 +53,18 @@ test("fetchPolymarketAccountData resolves profile metadata and account payloads"
       });
     }
 
-    if (url.includes("/value?")) {
-      return Response.json([
+    if (url.includes("/v1/accounting/snapshot")) {
+      return new Response(
+        buildAccountingSnapshotZip({
+          equityRows: [
+            ["125.500000", "701.375733", "826.875733", "2026-03-31T00:00:00Z"],
+          ],
+        }),
         {
-          user: "0xe48a00a7eaec1977fa9f72af4422c1628367dc27",
-          value: 701.37573288,
+          status: 200,
+          headers: { "content-type": "application/zip" },
         },
-      ]);
+      );
     }
 
     if (url.includes("/positions?")) {
@@ -83,6 +89,7 @@ test("fetchPolymarketAccountData resolves profile metadata and account payloads"
           outcome: "No",
           outcomeIndex: 1,
           endDate: "2027-01-01",
+          redeemable: false,
           negativeRisk: false,
         },
       ]);
@@ -99,10 +106,12 @@ test("fetchPolymarketAccountData resolves profile metadata and account payloads"
   assert.equal(result.address, "0x304160997e2d06fbfc0f54a8a714dc4cdf7b9e5f");
   assert.equal(result.proxyAddress, "0xe48a00a7eaec1977fa9f72af4422c1628367dc27");
   assert.equal(result.username, "0utr1");
-  assert.equal(result.totalValue, 701.37573288);
+  assert.equal(result.cashBalance, 125.5);
+  assert.equal(result.positionsValue, 701.38);
+  assert.equal(result.totalEquity, 826.88);
   assert.equal(result.positions.length, 1);
   assert.match(calls[0], /\/profile\/0x304160997e2d06fbfc0f54a8a714dc4cdf7b9e5f$/);
-  assert.match(calls[1], /\/value\?user=0xe48a00a7eaec1977fa9f72af4422c1628367dc27$/);
+  assert.match(calls[1], /\/v1\/accounting\/snapshot\?user=0x304160997e2d06fbfc0f54a8a714dc4cdf7b9e5f$/);
   assert.match(
     calls[2],
     /\/positions\?user=0xe48a00a7eaec1977fa9f72af4422c1628367dc27&sortBy=CURRENT&sortDirection=DESC&sizeThreshold=0&limit=500&offset=0$/,
@@ -121,8 +130,16 @@ test("fetchPolymarketAccountData paginates positions until exhaustion", async ()
       });
     }
 
-    if (url.includes("/value?")) {
-      return Response.json([{ value: 123 }]);
+    if (url.includes("/v1/accounting/snapshot")) {
+      return new Response(
+        buildAccountingSnapshotZip({
+          equityRows: [["10.000000", "123.000000", "133.000000", "2026-03-31T00:00:00Z"]],
+        }),
+        {
+          status: 200,
+          headers: { "content-type": "application/zip" },
+        },
+      );
     }
 
     if (url.includes("/positions?") && url.includes("offset=0")) {
@@ -183,8 +200,16 @@ test("fetchPolymarketAccountData retries once on transient fetch failures", asyn
       });
     }
 
-    if (url.includes("/value?")) {
-      return Response.json([{ value: 100 }]);
+    if (url.includes("/v1/accounting/snapshot")) {
+      return new Response(
+        buildAccountingSnapshotZip({
+          equityRows: [["10.000000", "100.000000", "110.000000", "2026-03-31T00:00:00Z"]],
+        }),
+        {
+          status: 200,
+          headers: { "content-type": "application/zip" },
+        },
+      );
     }
 
     if (url.includes("/positions?")) {
@@ -201,11 +226,11 @@ test("fetchPolymarketAccountData retries once on transient fetch failures", asyn
     retryDelayMs: 0,
   });
 
-  assert.equal(result.totalValue, 100);
+  assert.equal(result.totalEquity, 110);
   assert.equal(attempts, 4);
 });
 
-test("fetchPolymarketAccountData throws on malformed data payloads", async () => {
+test("fetchPolymarketAccountData throws on malformed accounting payloads", async () => {
   const fetchImpl = async (url) => {
     if (url.includes("/profile/")) {
       return new Response(PROFILE_HTML, {
@@ -214,8 +239,16 @@ test("fetchPolymarketAccountData throws on malformed data payloads", async () =>
       });
     }
 
-    if (url.includes("/value?")) {
-      return Response.json({ value: 123 });
+    if (url.includes("/v1/accounting/snapshot")) {
+      return new Response(
+        buildAccountingSnapshotZip({
+          equityRows: [],
+        }),
+        {
+          status: 200,
+          headers: { "content-type": "application/zip" },
+        },
+      );
     }
 
     if (url.includes("/positions?")) {
@@ -231,6 +264,6 @@ test("fetchPolymarketAccountData throws on malformed data payloads", async () =>
         address: "0x304160997e2d06fbfc0f54a8a714dc4cdf7b9e5f",
         fetchImpl,
       }),
-    /Polymarket value payload must be a non-empty array/,
+    /Polymarket accounting snapshot must contain exactly one equity row/,
   );
 });

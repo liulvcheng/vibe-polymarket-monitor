@@ -7,6 +7,8 @@ const snapshot = {
   address: "0x304160997e2d06fbfc0f54a8a714dc4cdf7b9e5f",
   username: "0utr1",
   sentAt: "2026-03-31T00:00:00.000Z",
+  cashBalance: 35,
+  totalEquity: 185,
   totalValue: 150,
   positions: [
     {
@@ -53,13 +55,16 @@ test("formatMonitorMessages renders summary and position details", () => {
   assert.match(messages[0], /PM Monitor/);
   assert.match(
     messages[0],
-    /Polymarket Profile: https:\/\/polymarket\.com\/profile\/0x304160997e2d06fbfc0f54a8a714dc4cdf7b9e5f/,
+    /Polymarket Profile:\nhttps:\/\/polymarket\.com\/profile\/0x304160997e2d06fbfc0f54a8a714dc4cdf7b9e5f/,
   );
-  assert.match(messages[0], /Total Value: \$150\.00/);
+  assert.match(messages[0], /Open Positions Value: \$150\.00/);
+  assert.match(messages[0], /Available Cash: \$35\.00/);
+  assert.match(messages[0], /Total Equity: \$185\.00/);
   assert.doesNotMatch(messages[0], /Delta vs prev2/);
-  assert.match(messages[0], /\n1\. Market A; Yes; Shares 100; Avg 61c\n/);
-  assert.match(messages[0], /Now 75c; Value \$75\.00; Cost \$61\.00; PnL \+\$14\.00 \(\+22\.95%\)\n/);
-  assert.match(messages[0], /dValue \+\$12\.00; dPrice \+5c; dShares \+10; Ends 2026-12-31/);
+  assert.match(messages[0], /\n1\. Market A\n/);
+  assert.match(messages[0], /Side: Yes; Shares: 100; Avg: 61c; Now: 75c\n/);
+  assert.match(messages[0], /Value: \$75\.00; Cost: \$61\.00; PnL: \+\$14\.00 \(\+22\.95%\)\n/);
+  assert.match(messages[0], /dValue \+\$12\.00; dPrice \+5c; dShares \+10; End: 2026-12-31/);
 });
 
 test("formatMonitorMessages separates numbered position blocks with a blank line", () => {
@@ -96,7 +101,7 @@ test("formatMonitorMessages separates numbered position blocks with a blank line
     maxLength: 3500,
   });
 
-  assert.match(messages[0], /Ends 2026-12-31\n\n2\. Market B; No; Shares 100; Avg 61c/);
+  assert.match(messages[0], /End: 2026-12-31\n\n2\. Market B\nSide: No; Shares: 100; Avg: 61c/);
 });
 
 test("formatMonitorMessages splits long outputs into multiple parts", () => {

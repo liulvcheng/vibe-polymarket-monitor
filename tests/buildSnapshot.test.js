@@ -59,11 +59,16 @@ test("buildSnapshot normalizes and sorts positions by value descending", () => {
     proxyAddress: "0xe48a00a7eaec1977fa9f72af4422c1628367dc27",
     username: "0utr1",
     fetchedAt: "2026-03-31T00:00:00.000Z",
-    totalValue: 87.5,
+    cashBalance: 12.5,
+    positionsValue: 87.5,
+    totalEquity: 100,
     positions: rawPositions,
   });
 
   assert.equal(snapshot.positions.length, 2);
+  assert.equal(snapshot.cashBalance, 12.5);
+  assert.equal(snapshot.totalEquity, 100);
+  assert.equal(snapshot.totalValue, 87.5);
   assert.equal(snapshot.positions[0].market, "Market A");
   assert.equal(snapshot.positions[1].market, "Market B");
   assert.equal(snapshot.positions[0].costBasis, 61);
@@ -78,7 +83,9 @@ test("buildSnapshot derives missing cost basis and pnl values", () => {
     proxyAddress: "0xe48a00a7eaec1977fa9f72af4422c1628367dc27",
     username: "0utr1",
     fetchedAt: "2026-03-31T00:00:00.000Z",
-    totalValue: 75,
+    cashBalance: 25,
+    positionsValue: 75,
+    totalEquity: 100,
     positions: [
       {
         asset: "asset-1",
@@ -95,4 +102,26 @@ test("buildSnapshot derives missing cost basis and pnl values", () => {
 
   assert.equal(snapshot.positions[0].costBasis, 61);
   assert.equal(snapshot.positions[0].pnl, 14);
+});
+
+test("buildSnapshot filters zero-share, redeemable, and ended positions", () => {
+  const snapshot = buildSnapshot({
+    address: "0x304160997e2d06fbfc0f54a8a714dc4cdf7b9e5f",
+    proxyAddress: "0xe48a00a7eaec1977fa9f72af4422c1628367dc27",
+    username: "0utr1",
+    fetchedAt: "2026-03-31T00:00:00.000Z",
+    cashBalance: 10,
+    positionsValue: 101,
+    totalEquity: 111,
+    positions: [
+      rawPositions[0],
+      { ...rawPositions[1], size: 0 },
+      { ...rawPositions[1], asset: "asset-3", conditionId: "condition-3", redeemable: true },
+      { ...rawPositions[1], asset: "asset-4", conditionId: "condition-4", endDate: "2025-01-01" },
+    ],
+  });
+
+  assert.equal(snapshot.positions.length, 1);
+  assert.equal(snapshot.positions[0].market, "Market A");
+  assert.equal(snapshot.totalValue, 75);
 });

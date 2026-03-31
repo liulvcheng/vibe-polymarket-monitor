@@ -5,6 +5,7 @@ import path from "node:path";
 import { mkdtemp, readFile } from "node:fs/promises";
 
 import { runMonitor } from "../src/main.js";
+import { buildAccountingSnapshotZip } from "./support/accountingSnapshot.js";
 
 const PROFILE_HTML = `
 <!DOCTYPE html>
@@ -27,8 +28,16 @@ test("runMonitor performs a first run and stores one snapshot", async () => {
       return new Response(PROFILE_HTML, { status: 200 });
     }
 
-    if (url.includes("/value?")) {
-      return Response.json([{ value: 150 }]);
+    if (url.includes("/v1/accounting/snapshot")) {
+      return new Response(
+        buildAccountingSnapshotZip({
+          equityRows: [["25.000000", "150.000000", "175.000000", "2026-03-31T00:00:00Z"]],
+        }),
+        {
+          status: 200,
+          headers: { "content-type": "application/zip" },
+        },
+      );
     }
 
     if (url.includes("/positions?")) {
@@ -46,6 +55,7 @@ test("runMonitor performs a first run and stores one snapshot", async () => {
           title: "Market A",
           outcome: "Yes",
           endDate: "2026-12-31",
+          redeemable: false,
         },
       ]);
     }
@@ -71,8 +81,11 @@ test("runMonitor performs a first run and stores one snapshot", async () => {
 
   assert.equal(result.messages.length, 1);
   assert.equal(telegramMessages.length, 1);
-  assert.match(telegramMessages[0], /Polymarket Profile: https:\/\/polymarket\.com\/profile\//);
-  assert.match(telegramMessages[0], /Delta vs prev1: N\/A/);
+  assert.match(telegramMessages[0], /Polymarket Profile:\nhttps:\/\/polymarket\.com\/profile\//);
+  assert.match(telegramMessages[0], /Open Positions Value: \$75\.00/);
+  assert.match(telegramMessages[0], /Available Cash: \$25\.00/);
+  assert.match(telegramMessages[0], /Total Equity: \$175\.00/);
+  assert.match(telegramMessages[0], /Open Value Delta vs prev1: N\/A/);
 
   const savedState = JSON.parse(await readFile(stateFilePath, "utf8"));
   assert.equal(savedState.snapshots.length, 1);
@@ -89,8 +102,16 @@ test("runMonitor keeps only the latest snapshot", async () => {
       return new Response(PROFILE_HTML, { status: 200 });
     }
 
-    if (url.includes("/value?")) {
-      return Response.json([{ value: 100 + runNumber }]);
+    if (url.includes("/v1/accounting/snapshot")) {
+      return new Response(
+        buildAccountingSnapshotZip({
+          equityRows: [[`${10 + runNumber}.000000`, `${100 + runNumber}.000000`, `${110 + runNumber}.000000`, "2026-03-31T00:00:00Z"]],
+        }),
+        {
+          status: 200,
+          headers: { "content-type": "application/zip" },
+        },
+      );
     }
 
     if (url.includes("/positions?")) {
@@ -107,6 +128,7 @@ test("runMonitor keeps only the latest snapshot", async () => {
           curPrice: 0.7,
           title: "Market A",
           outcome: "Yes",
+          redeemable: false,
         },
       ]);
     }
@@ -133,7 +155,7 @@ test("runMonitor keeps only the latest snapshot", async () => {
 
   const savedState = JSON.parse(await readFile(stateFilePath, "utf8"));
   assert.equal(savedState.snapshots.length, 1);
-  assert.equal(savedState.snapshots[0].totalValue, 103);
+  assert.equal(savedState.snapshots[0].totalEquity, 113);
 });
 
 test("runMonitor does not persist state when Telegram send fails", async () => {
@@ -145,8 +167,16 @@ test("runMonitor does not persist state when Telegram send fails", async () => {
       return new Response(PROFILE_HTML, { status: 200 });
     }
 
-    if (url.includes("/value?")) {
-      return Response.json([{ value: 150 }]);
+    if (url.includes("/v1/accounting/snapshot")) {
+      return new Response(
+        buildAccountingSnapshotZip({
+          equityRows: [["25.000000", "150.000000", "175.000000", "2026-03-31T00:00:00Z"]],
+        }),
+        {
+          status: 200,
+          headers: { "content-type": "application/zip" },
+        },
+      );
     }
 
     if (url.includes("/positions?")) {
