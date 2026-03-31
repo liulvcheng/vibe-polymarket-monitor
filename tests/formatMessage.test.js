@@ -138,6 +138,16 @@ test("formatMonitorMessages groups and sorts positions by market value then posi
   assert.ok(lighterGroupIndex !== -1);
   assert.ok(edgeXGroupIndex < lighterGroupIndex);
   assert.ok(higherValueIndex < lowerValueIndex);
+  assert.doesNotMatch(
+    messages[0],
+    /<b>EdgeX FDV Above One Day After Launch<\/b>\n\n<b>1\. EdgeX FDV above \$300M one day after launch\?<\/b>/,
+  );
+  assert.doesNotMatch(
+    messages[0],
+    /dShares: \+10\n\n\n<b>Will Lighter Reach Before 2027<\/b>/,
+  );
+  assert.match(messages[0], /dShares: \+10\nEnd: 2026-12-31\n\n<b>2\. EdgeX FDV above \$1B one day after launch\?<\/b>/);
+  assert.match(messages[0], /dShares: \+10\nEnd: 2026-12-31\n<b>Will Lighter Reach Before 2027<\/b>/);
 });
 
 test("formatMonitorMessages splits long outputs into multiple parts", () => {
@@ -165,4 +175,32 @@ test("formatMonitorMessages splits long outputs into multiple parts", () => {
   assert.ok(messages.length > 1);
   assert.match(messages[0], /Part 1\/\d+/);
   assert.match(messages[1], /Part 2\/\d+/);
+});
+
+test("formatMonitorMessages hides deprecated closed positions with zero last value", () => {
+  const messages = formatMonitorMessages({
+    snapshot,
+    diff: {
+      ...diff,
+      closedSincePrev1: [
+        {
+          market: "Market Kept",
+          outcome: "Yes",
+          value: 12.34,
+        },
+        {
+          market: "EdgeX FDV above $700M one day after launch?",
+          outcome: "Yes",
+          value: 0,
+        },
+      ],
+    },
+    timezone: "Asia/Shanghai",
+    maxLength: 3500,
+  });
+
+  assert.match(messages[0], /Closed or not active since prev1:/);
+  assert.match(messages[0], /- Market Kept; Yes; Last Value \$12\.34/);
+  assert.doesNotMatch(messages[0], /EdgeX FDV above \$700M one day after launch\?/);
+  assert.doesNotMatch(messages[0], /Last Value \$0\.00/);
 });

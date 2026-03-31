@@ -25,11 +25,11 @@ export function formatMonitorMessages({
   const groupedBlocks = buildGroupedBlocks(diff.positions);
 
   const closedBlock =
-    diff.closedSincePrev1.length === 0
+    diff.closedSincePrev1.filter(isDisplayableClosedPosition).length === 0
       ? []
       : [
           "Closed or not active since prev1:",
-          ...diff.closedSincePrev1.map(
+          ...diff.closedSincePrev1.filter(isDisplayableClosedPosition).map(
             (position) =>
               `- ${escapeHtml(position.market)}; ${escapeHtml(position.outcome)}; Last Value ${formatMoney(position.value)}`,
           ),
@@ -58,9 +58,7 @@ function buildGroupedBlocks(positions) {
   return groups.map((group) =>
     [
       `<b>${escapeHtml(group.title)}</b>`,
-      "",
       ...group.positions.map((position, index) => buildPositionBlock(position, index + 1)),
-      "",
     ].join("\n"),
   );
 }
@@ -167,6 +165,10 @@ function splitBlocksIntoMessages({ summaryBlock, positionBlocks, closedBlock, ma
   }
 
   return messages;
+}
+
+function isDisplayableClosedPosition(position) {
+  return typeof position?.value === "number" && position.value > 0;
 }
 
 function formatDateTime(value, timezone) {

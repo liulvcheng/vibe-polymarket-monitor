@@ -104,7 +104,7 @@ test("buildSnapshot derives missing cost basis and pnl values", () => {
   assert.equal(snapshot.positions[0].pnl, 14);
 });
 
-test("buildSnapshot filters zero-share, redeemable, and ended positions", () => {
+test("buildSnapshot filters zero-share and redeemable positions but keeps valued non-redeemable ended positions", () => {
   const snapshot = buildSnapshot({
     address: "0x304160997e2d06fbfc0f54a8a714dc4cdf7b9e5f",
     proxyAddress: "0xe48a00a7eaec1977fa9f72af4422c1628367dc27",
@@ -121,9 +121,10 @@ test("buildSnapshot filters zero-share, redeemable, and ended positions", () => 
     ],
   });
 
-  assert.equal(snapshot.positions.length, 1);
+  assert.equal(snapshot.positions.length, 2);
   assert.equal(snapshot.positions[0].market, "Market A");
-  assert.equal(snapshot.totalValue, 75);
+  assert.equal(snapshot.positions[1].market, "Market B");
+  assert.equal(snapshot.totalValue, 87.5);
 });
 
 test("buildSnapshot filters positions that round to zero shares or zero value", () => {

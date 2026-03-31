@@ -83,18 +83,7 @@ function isDisplayablePosition(position, fetchedAt) {
   if (position.redeemable) {
     return false;
   }
-
-  if (!position.endDate) {
-    return true;
-  }
-
-  const endTime = Date.parse(position.endDate);
-  const fetchedTime = Date.parse(fetchedAt);
-  if (Number.isNaN(endTime) || Number.isNaN(fetchedTime)) {
-    return true;
-  }
-
-  return endTime > fetchedTime;
+  return true;
 }
 
 function computePnlPercent(costBasis, pnl, fallback) {
