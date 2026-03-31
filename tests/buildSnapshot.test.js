@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 
 import { buildPositionKey, buildSnapshot } from "../src/buildSnapshot.js";
 
+// Snapshot fixtures mimic the fields the Polymarket API returns for active positions.
 const rawPositions = [
   {
     asset: "asset-1",

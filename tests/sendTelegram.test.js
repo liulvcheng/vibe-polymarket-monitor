@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 
 import { sendTelegramMessages } from "../src/sendTelegram.js";
 
+// Telegram tests stub fetch so we can assert the exact payload sent to the API.
 test("sendTelegramMessages posts a single text message when content fits", async () => {
   const sentRequests = [];
 

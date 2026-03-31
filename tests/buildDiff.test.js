@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 
 import { buildDiff } from "../src/buildDiff.js";
 
+// These fixtures keep the diff cases small enough to reason about by inspection.
 const current = {
   totalValue: 150,
   positions: [

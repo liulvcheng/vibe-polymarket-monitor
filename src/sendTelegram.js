@@ -1,3 +1,4 @@
+// Send each rendered message part sequentially so Telegram preserves ordering.
 export async function sendTelegramMessages({
   token,
   chatId,

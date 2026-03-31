@@ -3,6 +3,7 @@ name: Polymarket Monitor
 on:
   workflow_dispatch:
   schedule:
+    # Runs every three hours in UTC, which maps to the intended Beijing-time cadence.
     - cron: "0 1,4,7,10,13,16,19,22 * * *"
 
 permissions:
@@ -36,6 +37,7 @@ jobs:
       - name: Restore monitor state
         shell: bash
         run: |
+          # Default to an empty state and overwrite it only when monitor-state exists.
           mkdir -p state
           echo '{"address":"","snapshots":[]}' > state/state.json
           set +e
@@ -62,6 +64,7 @@ jobs:
         if: success()
         shell: bash
         run: |
+          # Write the new snapshot only after Telegram send succeeds.
           cp state/state.json "$RUNNER_TEMP/state.json"
           set +e
           git ls-remote --exit-code origin refs/heads/monitor-state >/dev/null 2>&1

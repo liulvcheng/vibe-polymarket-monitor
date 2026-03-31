@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 
 import { loadConfig } from "../src/config.js";
 
+// Config tests cover validation and defaulting because the app fails fast on bad env.
 test("loadConfig returns normalized required settings", () => {
   const config = loadConfig({
     PM_ADDRESS: "0x304160997e2d06fbfc0f54a8a714dc4cdf7b9e5f",

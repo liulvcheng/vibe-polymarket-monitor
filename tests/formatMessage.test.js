@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 
 import { formatMonitorMessages } from "../src/formatMessage.js";
 
+// Keep one compact fixture and override only the fields each formatting case cares about.
 const snapshot = {
   address: "0x304160997e2d06fbfc0f54a8a714dc4cdf7b9e5f",
   username: "0utr1",

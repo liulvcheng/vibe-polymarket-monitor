@@ -1,5 +1,6 @@
 import { strToU8, zipSync } from "fflate";
 
+// Build an in-memory zip that matches the accounting snapshot shape used by fetchPm tests.
 export function buildAccountingSnapshotZip({
   equityRows = [],
   positionRows = [],

@@ -7,6 +7,7 @@ import {
 } from "../src/fetchPm.js";
 import { buildAccountingSnapshotZip } from "./support/accountingSnapshot.js";
 
+// Use a minimal profile shell because the parser only needs the embedded NEXT_DATA payload.
 const PROFILE_HTML = `
 <!DOCTYPE html>
 <html>

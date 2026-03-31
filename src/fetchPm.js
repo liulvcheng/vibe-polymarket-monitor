@@ -4,6 +4,7 @@ const DEFAULT_TIMEOUT_MS = 15_000;
 const DEFAULT_RETRY_COUNT = 1;
 const DEFAULT_RETRY_DELAY_MS = 750;
 
+// Fetch the public Polymarket profile, resolve the proxy wallet, then load balances and positions.
 export async function fetchPolymarketAccountData({
   address,
   fetchImpl = fetch,
@@ -66,6 +67,7 @@ async function fetchAllPositions({
   const positions = [];
 
   while (true) {
+    // The positions API is paginated; keep reading until the page comes back short.
     const page = await fetchJsonWithRetry({
       url:
         "https://data-api.polymarket.com/positions" +
@@ -202,6 +204,7 @@ function parseAccountingSnapshotZip(buffer) {
 
   const equityRow = equityRows
     .slice()
+    // When multiple snapshots are present, use the newest valuation row.
     .sort((left, right) => {
       const leftTime = Date.parse(left.valuationTime ?? "");
       const rightTime = Date.parse(right.valuationTime ?? "");

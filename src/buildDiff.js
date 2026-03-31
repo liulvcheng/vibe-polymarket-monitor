@@ -1,3 +1,4 @@
+// Compare the latest snapshot with prev1 and attach per-position deltas.
 export function buildDiff({ current, prev1 }) {
   const prev1Map = buildPositionMap(prev1?.positions ?? []);
   const positions = current.positions.map((position) =>

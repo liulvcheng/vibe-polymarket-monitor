@@ -1,3 +1,4 @@
+// Load and validate the runtime settings required by the monitor.
 export function loadConfig(env = process.env) {
   const pmAddress = requireString(env.PM_ADDRESS, "PM_ADDRESS").toLowerCase();
   const telegramBotToken = requireString(

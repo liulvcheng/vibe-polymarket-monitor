@@ -7,6 +7,7 @@ import { mkdtemp, readFile } from "node:fs/promises";
 import { runMonitor } from "../src/main.js";
 import { buildAccountingSnapshotZip } from "./support/accountingSnapshot.js";
 
+// End-to-end tests exercise the orchestration layer with a fully stubbed network.
 const PROFILE_HTML = `
 <!DOCTYPE html>
 <html>
