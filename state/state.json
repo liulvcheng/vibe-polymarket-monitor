@@ -5,7 +5,7 @@
       "address": "0x304160997e2d06fbfc0f54a8a714dc4cdf7b9e5f",
       "proxyAddress": "0xe48a00a7eaec1977fa9f72af4422c1628367dc27",
       "username": "0utr1",
-      "sentAt": "2026-03-31T10:43:02.934Z",
+      "sentAt": "2026-03-31T11:10:16.183Z",
       "cashBalance": 43.28,
       "positionsValue": 699.23,
       "totalEquity": 742.51,
@@ -109,26 +109,6 @@
           "endDate": "2027-01-01",
           "redeemable": false,
           "mergeable": false,
-          "negativeRisk": false
-        },
-        {
-          "id": "0xafb71fc840d63e36883af24961c62ab3db63e6b23c857dc286dc7af5445394be::Yes",
-          "asset": "22807169165588715173633697723091544473094160030117478812479915965928329743915",
-          "conditionId": "0xafb71fc840d63e36883af24961c62ab3db63e6b23c857dc286dc7af5445394be",
-          "market": "EdgeX FDV above $700M one day after launch?",
-          "slug": "edgex-fdv-above-700m-one-day-after-launch-588-327-781-534-369",
-          "eventSlug": "edgex-fdv-above-one-day-after-launch",
-          "outcome": "Yes",
-          "shares": 0.001192,
-          "avgPrice": 0.4,
-          "currentPrice": 0.105,
-          "value": 0,
-          "costBasis": 0,
-          "pnl": 0,
-          "pnlPercent": -73.75,
-          "endDate": "2027-01-01",
-          "redeemable": false,
-          "mergeable": true,
           "negativeRisk": false
         }
       ]
