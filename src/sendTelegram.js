@@ -5,6 +5,7 @@ export async function sendTelegramMessages({
   messages,
   fetchImpl = fetch,
 }) {
+  // 顺序发送而不是并发发送，避免 Telegram 客户端里多段消息乱序。
   for (const message of messages) {
     await sendRequest({
       token,
@@ -31,6 +32,7 @@ async function sendRequest({ token, endpoint, body, headers, fetchImpl }) {
   });
 
   const payload = await response.json();
+  // Telegram 可能返回 HTTP 200 但 payload.ok=false，这里两层都要检查。
   if (!response.ok || payload.ok === false) {
     const description = payload?.description ?? "unknown Telegram API error";
     throw new Error(`Telegram send failed with HTTP ${response.status}: ${description}`);

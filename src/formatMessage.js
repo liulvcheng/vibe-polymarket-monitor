@@ -9,6 +9,7 @@ export function formatMonitorMessages({
   maxLength = DEFAULT_MAX_LENGTH,
 }) {
   const profileUrl = `https://polymarket.com/profile/${snapshot.address}`;
+  // summaryBlock 始终放在第一条消息开头，方便在 Telegram 列表页直接看到核心信息。
   const summaryBlock = [
     "PM Monitor",
     "Polymarket Profile:",
@@ -26,6 +27,8 @@ export function formatMonitorMessages({
 
   const groupedBlocks = buildGroupedBlocks(diff.positions);
 
+  // 已关闭列表只保留最后价值仍大于 0 的仓位。
+  // 这样可以避免把“上次就是 0”的历史垃圾项继续展示出来。
   const closedBlock =
     diff.closedSincePrev1.filter(isDisplayableClosedPosition).length === 0
       ? []
@@ -49,11 +52,13 @@ export function formatMonitorMessages({
     return parts;
   }
 
+  // 分片后补上 part 标记，避免用户误以为消息内容被截断。
   return parts.map((message, index) => `Part ${index + 1}/${parts.length}\n\n${message}`);
 }
 
 function buildGroupedBlocks(positions) {
   const groups = Array.from(groupPositions(positions).values()).sort(
+    // 市场块按总价值降序，优先把影响最大的市场放到上面。
     (left, right) => right.totalValue - left.totalValue,
   );
 
@@ -93,6 +98,7 @@ function groupPositions(positions) {
   }
 
   for (const group of groups.values()) {
+    // 同一市场内的多个预测也按单仓位价值降序，减少来回扫读成本。
     group.positions.sort((left, right) => right.value - left.value);
   }
 
@@ -100,6 +106,7 @@ function groupPositions(positions) {
 }
 
 function buildGroupTitle(position) {
+  // eventSlug 更适合作为市场分组标题；没有时再退回单个仓位标题。
   if (position.eventSlug) {
     return titleCaseSlug(position.eventSlug);
   }
@@ -108,6 +115,7 @@ function buildGroupTitle(position) {
 }
 
 function buildPositionBlock(position, index) {
+  // 每个指标独立一行，优先保证手机上可扫读，而不是压缩成更短的单行格式。
   const lines = [
     `<b>${index}. ${escapeHtml(position.market)}</b>`,
     `Side: ${escapeHtml(position.outcome)}`,
@@ -126,6 +134,7 @@ function buildPositionBlock(position, index) {
     lines.push(`End: ${escapeHtml(position.endDate)}`);
   }
 
+  // mergeable / negativeRisk 只在为 true 时展示，避免给普通仓位增加无效噪音。
   if (position.mergeable) {
     lines.push("Mergeable: yes");
   }
@@ -160,6 +169,7 @@ function splitBlocksIntoMessages({ summaryBlock, positionBlocks, closedBlock, ma
   }
 
   if (closedBlock) {
+    // 已关闭列表总是作为一个整体追加，避免用户在不同分片里来回找。
     if ((current + closedBlock).length > maxLength) {
       messages.push(current.trimEnd());
       current = closedBlock;
@@ -176,10 +186,12 @@ function splitBlocksIntoMessages({ summaryBlock, positionBlocks, closedBlock, ma
 }
 
 function isDisplayableClosedPosition(position) {
+  // 最后一笔价值为 0 的已关闭仓位通常没有信息量，直接隐藏。
   return typeof position?.value === "number" && position.value > 0;
 }
 
 function formatDateTime(value, timezone) {
+  // 使用固定格式输出，避免不同运行环境 locale 差异导致消息时间样式漂移。
   return new Intl.DateTimeFormat("en-CA", {
     timeZone: timezone,
     year: "numeric",
@@ -205,6 +217,7 @@ function formatDeltaMoney(value) {
     return "N/A";
   }
 
+  // NEW 是逻辑标记，不参与数值正负格式化。
   if (value === "NEW") {
     return "NEW";
   }
@@ -284,6 +297,7 @@ function titleCaseSlug(value) {
 }
 
 function escapeHtml(value) {
+  // Telegram HTML 模式下必须转义特殊字符，否则标题和链接容易被错误解析。
   return String(value)
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")

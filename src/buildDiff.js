@@ -16,6 +16,7 @@ export function buildDiff({ current, prev1 }) {
       deltaValuePrev1: deltaNumber(current.totalValue, prev1?.totalValue),
     },
     positions,
+    // prev1 里有、current 里没有的仓位，统一视为“自上次以来已关闭或不再 active”。
     closedSincePrev1: (prev1?.positions ?? []).filter(
       (position) => !current.positions.some((currentPosition) => currentPosition.id === position.id),
     ),
@@ -52,10 +53,12 @@ function withDeltas({
 }
 
 function deltaPositionField(currentValue, previousValue, hasPreviousSnapshot) {
+  // 首次运行没有比较基线，消息里应该展示 N/A 而不是 0。
   if (!hasPreviousSnapshot) {
     return null;
   }
 
+  // prev1 不存在该仓位时，显式标成 NEW，方便和数值变化区分。
   if (previousValue == null) {
     return "NEW";
   }

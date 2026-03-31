@@ -13,6 +13,7 @@ export async function fetchPolymarketAccountData({
   retryCount = DEFAULT_RETRY_COUNT,
   retryDelayMs = DEFAULT_RETRY_DELAY_MS,
 }) {
+  // fetchedAt 以抓取开始时间为准，后续快照、diff 和消息时间都基于这一刻。
   const fetchedAt = new Date().toISOString();
   const profileHtml = await fetchTextWithRetry({
     url: `https://polymarket.com/profile/${address}`,
@@ -22,6 +23,8 @@ export async function fetchPolymarketAccountData({
     retryDelayMs,
     accept: "text/html",
   });
+
+  // Polymarket 前端展示仓位依赖 proxyAddress；直接用公开地址查 positions 可能拿不到完整结果。
   const { proxyAddress, username } = extractProfileMetadataFromHtml(profileHtml);
   const [accountingSnapshot, positionsPayload] = await Promise.all([
     fetchAccountingSnapshotWithRetry({
@@ -85,6 +88,7 @@ async function fetchAllPositions({
 
     positions.push(...page);
 
+    // 当前页数量少于 limit 说明已经到最后一页，继续翻页只会拿到空数组。
     if (page.length < limit) {
       return positions;
     }
@@ -94,6 +98,7 @@ async function fetchAllPositions({
 }
 
 export function extractProfileMetadataFromHtml(html) {
+  // 页面里的 __NEXT_DATA__ JSON 足够稳定，直接正则提取需要的最小字段即可。
   const proxyAddress =
     html.match(/"proxyAddress"\s*:\s*"(0x[a-fA-F0-9]{40})"/)?.[1];
   const username = html.match(/"username"\s*:\s*"([^"]+)"/)?.[1] ?? null;
@@ -146,6 +151,7 @@ async function fetchWithRetry({
 
   for (let attempt = 0; attempt <= retryCount; attempt += 1) {
     const controller = new AbortController();
+    // 超时后统一由 AbortController 打断请求，避免任务在 GitHub Actions 里长时间挂起。
     const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
     try {
@@ -158,6 +164,7 @@ async function fetchWithRetry({
       });
 
       if (!response.ok) {
+        // 非 2xx 直接视为失败，这样调用方不会在半残缺数据上继续执行。
         throw new Error(`HTTP ${response.status} for ${url}`);
       }
 
@@ -184,6 +191,7 @@ function delay(ms) {
 
 function toNumber(value) {
   const number = Number(value);
+  // 数据源偶尔会返回空字符串或 null，这里统一拦住，避免后续计算 silently 变成 NaN。
   if (!Number.isFinite(number)) {
     throw new Error(`Expected numeric value, received: ${value}`);
   }
@@ -195,6 +203,7 @@ function parseAccountingSnapshotZip(buffer) {
   const files = unzipSync(buffer);
   const equityCsv = files["equity.csv"];
 
+  // equity.csv 是账户级摘要的唯一输入；缺失时宁可失败也不要猜测。
   if (!equityCsv) {
     throw new Error("Polymarket accounting snapshot is missing equity.csv");
   }
@@ -212,6 +221,7 @@ function parseAccountingSnapshotZip(buffer) {
       const rightTime = Date.parse(right.valuationTime ?? "");
 
       if (Number.isNaN(leftTime) || Number.isNaN(rightTime)) {
+        // 如果时间戳异常，维持原顺序，至少不会因为 NaN 造成排序崩坏。
         return 0;
       }
 
@@ -232,6 +242,7 @@ function parseCsv(content) {
   return dataLines
     .filter(Boolean)
     .map((line) => {
+      // accounting csv 结构很简单，直接按逗号拆分即可；这里不引入更重的 CSV 解析器。
       const values = line.split(",");
       return Object.fromEntries(headers.map((header, index) => [header, values[index] ?? ""]));
     });

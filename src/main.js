@@ -39,6 +39,8 @@ export async function runMonitor({ config, fetchImpl = fetch }) {
     snapshots: [snapshot],
   };
 
+  // 只有 sendTelegramMessages 成功返回，状态才会写盘。
+  // 这样下一次 diff 的基线永远对应“已经成功发出去”的那次快照。
   await saveState(config.stateFilePath, nextState);
 
   return {
@@ -52,6 +54,7 @@ export async function runMonitor({ config, fetchImpl = fetch }) {
 export async function main() {
   const config = loadConfig();
   const result = await runMonitor({ config });
+  // 输出一段简短 JSON 给 Actions 日志看，排查线上问题时比纯文本更容易 grep。
   process.stdout.write(
     JSON.stringify(
       {
@@ -72,6 +75,7 @@ async function loadState(stateFilePath) {
     const parsed = JSON.parse(content);
     return {
       address: parsed.address ?? "",
+      // 即使文件结构异常，也尽量把 snapshots 收敛成数组，避免主流程再做空值判断。
       snapshots: Array.isArray(parsed.snapshots) ? parsed.snapshots : [],
     };
   } catch (error) {
@@ -88,6 +92,7 @@ async function loadState(stateFilePath) {
 }
 
 async function saveState(stateFilePath, state) {
+  // 本地和 Actions 都可能在空目录下启动，写文件前先确保目录存在。
   await mkdir(path.dirname(stateFilePath), { recursive: true });
   await writeFile(stateFilePath, JSON.stringify(state, null, 2) + "\n", "utf8");
 }
