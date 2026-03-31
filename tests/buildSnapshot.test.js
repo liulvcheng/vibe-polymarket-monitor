@@ -125,3 +125,29 @@ test("buildSnapshot filters zero-share, redeemable, and ended positions", () => 
   assert.equal(snapshot.positions[0].market, "Market A");
   assert.equal(snapshot.totalValue, 75);
 });
+
+test("buildSnapshot filters positions that round to zero shares or zero value", () => {
+  const snapshot = buildSnapshot({
+    address: "0x304160997e2d06fbfc0f54a8a714dc4cdf7b9e5f",
+    proxyAddress: "0xe48a00a7eaec1977fa9f72af4422c1628367dc27",
+    username: "0utr1",
+    fetchedAt: "2026-03-31T00:00:00.000Z",
+    cashBalance: 10,
+    positionsValue: 101,
+    totalEquity: 111,
+    positions: [
+      rawPositions[0],
+      {
+        ...rawPositions[1],
+        asset: "asset-5",
+        conditionId: "condition-5",
+        size: 0.004,
+        currentValue: 0.004,
+        initialValue: 0.004,
+      },
+    ],
+  });
+
+  assert.equal(snapshot.positions.length, 1);
+  assert.equal(snapshot.positions[0].market, "Market A");
+});

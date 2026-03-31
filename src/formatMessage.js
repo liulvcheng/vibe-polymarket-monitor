@@ -10,8 +10,8 @@ export function formatMonitorMessages({
   const summaryBlock = [
     "PM Monitor",
     "Polymarket Profile:",
-    profileUrl,
-    `Account: ${snapshot.username ? `@${snapshot.username}` : shortAddress(snapshot.address)} (${shortAddress(snapshot.address)})`,
+    escapeHtml(profileUrl),
+    `Account: ${escapeHtml(snapshot.username ? `@${snapshot.username}` : shortAddress(snapshot.address))} (${escapeHtml(shortAddress(snapshot.address))})`,
     `Time: ${formatDateTime(snapshot.sentAt, timezone)}`,
     `Open Positions Value: ${formatMoney(snapshot.totalValue)}`,
     `Available Cash: ${formatMoney(snapshot.cashBalance)}`,
@@ -22,16 +22,7 @@ export function formatMonitorMessages({
     "",
   ].join("\n");
 
-  const positionBlocks = diff.positions.map((position, index) =>
-    [
-      `${index + 1}. ${position.market}`,
-      `Side: ${position.outcome}; Shares: ${formatShares(position.shares)}; Avg: ${formatCents(position.avgPrice)}; Now: ${formatCents(position.currentPrice)}`,
-      `Value: ${formatMoney(position.value)}; Cost: ${formatMoney(position.costBasis)}; PnL: ${formatDeltaMoney(position.pnl)} (${formatPercent(position.pnlPercent)})`,
-      `dValue ${formatDeltaMoney(position.deltaValuePrev1)}; dPrice ${formatDeltaCents(position.deltaPricePrev1)}; dShares ${formatDeltaShares(position.deltaSharesPrev1)}${buildOptionalSuffix(position, 1)}`,
-      "",
-      "",
-    ].join("\n"),
-  );
+  const groupedBlocks = buildGroupedBlocks(diff.positions);
 
   const closedBlock =
     diff.closedSincePrev1.length === 0
@@ -40,14 +31,14 @@ export function formatMonitorMessages({
           "Closed or not active since prev1:",
           ...diff.closedSincePrev1.map(
             (position) =>
-              `- ${position.market}; ${position.outcome}; Last Value ${formatMoney(position.value)}`,
+              `- ${escapeHtml(position.market)}; ${escapeHtml(position.outcome)}; Last Value ${formatMoney(position.value)}`,
           ),
           "",
         ];
 
   const parts = splitBlocksIntoMessages({
     summaryBlock,
-    positionBlocks,
+    positionBlocks: groupedBlocks,
     closedBlock: closedBlock.join("\n"),
     maxLength,
   });
@@ -57,6 +48,89 @@ export function formatMonitorMessages({
   }
 
   return parts.map((message, index) => `Part ${index + 1}/${parts.length}\n\n${message}`);
+}
+
+function buildGroupedBlocks(positions) {
+  const groups = Array.from(groupPositions(positions).values()).sort(
+    (left, right) => right.totalValue - left.totalValue,
+  );
+
+  return groups.map((group) =>
+    [
+      `<b>${escapeHtml(group.title)}</b>`,
+      "",
+      ...group.positions.map((position, index) => buildPositionBlock(position, index + 1)),
+      "",
+    ].join("\n"),
+  );
+}
+
+function groupPositions(positions) {
+  const groups = new Map();
+
+  for (const position of positions) {
+    const key = position.eventSlug ?? position.slug ?? position.market;
+    const title = buildGroupTitle(position);
+    const existing = groups.get(key);
+
+    if (existing) {
+      existing.positions.push(position);
+      existing.totalValue += position.value;
+      continue;
+    }
+
+    groups.set(key, {
+      key,
+      title,
+      totalValue: position.value,
+      positions: [position],
+    });
+  }
+
+  for (const group of groups.values()) {
+    group.positions.sort((left, right) => right.value - left.value);
+  }
+
+  return groups;
+}
+
+function buildGroupTitle(position) {
+  if (position.eventSlug) {
+    return titleCaseSlug(position.eventSlug);
+  }
+
+  return position.market;
+}
+
+function buildPositionBlock(position, index) {
+  const lines = [
+    `<b>${index}. ${escapeHtml(position.market)}</b>`,
+    `Side: ${escapeHtml(position.outcome)}`,
+    `Value: ${formatMoney(position.value)}`,
+    `PnL: ${formatDeltaMoney(position.pnl)} (${formatPercent(position.pnlPercent)})`,
+    `Shares: ${formatShares(position.shares)}`,
+    `Avg: ${formatCents(position.avgPrice)}`,
+    `Now: ${formatCents(position.currentPrice)}`,
+    `Cost: ${formatMoney(position.costBasis)}`,
+    `dValue: ${formatDeltaMoney(position.deltaValuePrev1)}`,
+    `dPrice: ${formatDeltaCents(position.deltaPricePrev1)}`,
+    `dShares: ${formatDeltaShares(position.deltaSharesPrev1)}`,
+  ];
+
+  if (position.endDate) {
+    lines.push(`End: ${escapeHtml(position.endDate)}`);
+  }
+
+  if (position.mergeable) {
+    lines.push("Mergeable: yes");
+  }
+
+  if (position.negativeRisk) {
+    lines.push("Negative risk: yes");
+  }
+
+  lines.push("");
+  return lines.join("\n");
 }
 
 function splitBlocksIntoMessages({ summaryBlock, positionBlocks, closedBlock, maxLength }) {
@@ -168,32 +242,39 @@ function formatPercent(value) {
   return `${value >= 0 ? "+" : ""}${value.toFixed(2)}%`;
 }
 
-function buildOptionalSuffix(position, fieldsInLine = 0) {
-  const parts = [];
-
-  if (position.endDate) {
-    parts.push(`End: ${position.endDate}`);
-  }
-
-  if (position.mergeable) {
-    parts.push("Mergeable: yes");
-  }
-
-  if (position.negativeRisk) {
-    parts.push("Negative risk: yes");
-  }
-
-  if (parts.length === 0) {
-    return "";
-  }
-
-  if (fieldsInLine >= 4) {
-    return `\n${parts.join("; ")}`;
-  }
-
-  return `; ${parts.join("; ")}`;
-}
-
 function shortAddress(value) {
   return `${value.slice(0, 6)}...${value.slice(-4)}`;
+}
+
+function titleCaseSlug(value) {
+  const tokenMap = new Map([
+    ["edgex", "EdgeX"],
+    ["megaeth", "MegaETH"],
+    ["fogo", "Fogo"],
+    ["fdv", "FDV"],
+  ]);
+
+  return value
+    .split("-")
+    .map((part) => {
+      const normalizedPart = part.toLowerCase();
+
+      if (tokenMap.has(normalizedPart)) {
+        return tokenMap.get(normalizedPart);
+      }
+
+      if (/^\$?\d/.test(part)) {
+        return part.toUpperCase();
+      }
+
+      return part.charAt(0).toUpperCase() + part.slice(1);
+    })
+    .join(" ");
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
 }

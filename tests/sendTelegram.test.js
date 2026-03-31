@@ -21,6 +21,8 @@ test("sendTelegramMessages posts a single text message when content fits", async
   assert.equal(sentRequests.length, 1);
   assert.match(sentRequests[0].url, /sendMessage$/);
   assert.equal(JSON.parse(sentRequests[0].options.body).text, "one");
+  assert.equal(JSON.parse(sentRequests[0].options.body).parse_mode, "HTML");
+  assert.equal(JSON.parse(sentRequests[0].options.body).disable_web_page_preview, true);
 });
 
 test("sendTelegramMessages sends multi-part content as ordered messages", async () => {
@@ -43,6 +45,8 @@ test("sendTelegramMessages sends multi-part content as ordered messages", async 
   assert.match(sentRequests[1].url, /sendMessage$/);
   assert.equal(JSON.parse(sentRequests[0].options.body).text, "part 1\nsummary");
   assert.equal(JSON.parse(sentRequests[1].options.body).text, "part 2");
+  assert.equal(JSON.parse(sentRequests[0].options.body).parse_mode, "HTML");
+  assert.equal(JSON.parse(sentRequests[1].options.body).parse_mode, "HTML");
 });
 
 test("sendTelegramMessages throws on Telegram API failures", async () => {

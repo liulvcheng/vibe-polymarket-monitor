@@ -11,6 +11,8 @@ export async function sendTelegramMessages({
       body: JSON.stringify({
         chat_id: chatId,
         text: message,
+        parse_mode: "HTML",
+        disable_web_page_preview: true,
       }),
       headers: {
         "content-type": "application/json",

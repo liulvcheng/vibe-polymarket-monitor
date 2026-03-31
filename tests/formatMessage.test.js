@@ -13,7 +13,7 @@ const snapshot = {
   positions: [
     {
       id: "condition-1::Yes",
-      market: "Market A",
+      market: "EdgeX FDV above $1B one day after launch?",
       outcome: "Yes",
       shares: 100,
       avgPrice: 0.61,
@@ -23,6 +23,7 @@ const snapshot = {
       pnl: 14,
       pnlPercent: 22.95,
       endDate: "2026-12-31",
+      eventSlug: "edgex-fdv-above-one-day-after-launch",
     },
   ],
 };
@@ -61,23 +62,41 @@ test("formatMonitorMessages renders summary and position details", () => {
   assert.match(messages[0], /Available Cash: \$35\.00/);
   assert.match(messages[0], /Total Equity: \$185\.00/);
   assert.doesNotMatch(messages[0], /Delta vs prev2/);
-  assert.match(messages[0], /\n1\. Market A\n/);
-  assert.match(messages[0], /Side: Yes; Shares: 100; Avg: 61c; Now: 75c\n/);
-  assert.match(messages[0], /Value: \$75\.00; Cost: \$61\.00; PnL: \+\$14\.00 \(\+22\.95%\)\n/);
-  assert.match(messages[0], /dValue \+\$12\.00; dPrice \+5c; dShares \+10; End: 2026-12-31/);
+  assert.match(messages[0], /<b>EdgeX FDV Above One Day After Launch<\/b>/);
+  assert.match(messages[0], /<b>1\. EdgeX FDV above \$1B one day after launch\?<\/b>/);
+  assert.match(messages[0], /Side: Yes\n/);
+  assert.match(messages[0], /Value: \$75\.00\n/);
+  assert.match(messages[0], /PnL: \+\$14\.00 \(\+22\.95%\)\n/);
+  assert.match(messages[0], /Shares: 100\n/);
+  assert.match(messages[0], /Avg: 61c\n/);
+  assert.match(messages[0], /Now: 75c\n/);
+  assert.match(messages[0], /Cost: \$61\.00\n/);
+  assert.match(messages[0], /dValue: \+\$12\.00\n/);
+  assert.match(messages[0], /dPrice: \+5c\n/);
+  assert.match(messages[0], /dShares: \+10\n/);
+  assert.match(messages[0], /End: 2026-12-31/);
 });
 
-test("formatMonitorMessages separates numbered position blocks with a blank line", () => {
+test("formatMonitorMessages groups and sorts positions by market value then position value", () => {
   const messages = formatMonitorMessages({
     snapshot: {
       ...snapshot,
       positions: [
-        snapshot.positions[0],
         {
           ...snapshot.positions[0],
           id: "condition-2::No",
-          market: "Market B",
+          market: "Will Lighter reach $4 before 2027?",
           outcome: "No",
+          eventSlug: "will-lighter-reach-before-2027",
+          value: 30,
+        },
+        snapshot.positions[0],
+        {
+          ...snapshot.positions[0],
+          id: "condition-3::Yes",
+          market: "EdgeX FDV above $300M one day after launch?",
+          eventSlug: "edgex-fdv-above-one-day-after-launch",
+          value: 120,
         },
       ],
     },
@@ -85,15 +104,24 @@ test("formatMonitorMessages separates numbered position blocks with a blank line
       ...diff,
       summary: {
         ...diff.summary,
-        activePositions: 2,
+        activePositions: 3,
       },
       positions: [
-        diff.positions[0],
         {
           ...diff.positions[0],
           id: "condition-2::No",
-          market: "Market B",
+          market: "Will Lighter reach $4 before 2027?",
           outcome: "No",
+          eventSlug: "will-lighter-reach-before-2027",
+          value: 30,
+        },
+        diff.positions[0],
+        {
+          ...diff.positions[0],
+          id: "condition-3::Yes",
+          market: "EdgeX FDV above $300M one day after launch?",
+          eventSlug: "edgex-fdv-above-one-day-after-launch",
+          value: 120,
         },
       ],
     },
@@ -101,7 +129,15 @@ test("formatMonitorMessages separates numbered position blocks with a blank line
     maxLength: 3500,
   });
 
-  assert.match(messages[0], /End: 2026-12-31\n\n2\. Market B\nSide: No; Shares: 100; Avg: 61c/);
+  const edgeXGroupIndex = messages[0].indexOf("<b>EdgeX FDV Above One Day After Launch</b>");
+  const lighterGroupIndex = messages[0].indexOf("<b>Will Lighter Reach Before 2027</b>");
+  const higherValueIndex = messages[0].indexOf("<b>1. EdgeX FDV above $300M one day after launch?</b>");
+  const lowerValueIndex = messages[0].indexOf("<b>2. EdgeX FDV above $1B one day after launch?</b>");
+
+  assert.ok(edgeXGroupIndex !== -1);
+  assert.ok(lighterGroupIndex !== -1);
+  assert.ok(edgeXGroupIndex < lighterGroupIndex);
+  assert.ok(higherValueIndex < lowerValueIndex);
 });
 
 test("formatMonitorMessages splits long outputs into multiple parts", () => {

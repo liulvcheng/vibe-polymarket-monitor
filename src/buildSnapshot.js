@@ -72,7 +72,11 @@ function normalizePosition(rawPosition) {
 }
 
 function isDisplayablePosition(position, fetchedAt) {
-  if (position.shares <= 0) {
+  if (roundQuantity(position.shares) <= 0) {
+    return false;
+  }
+
+  if (roundCurrency(position.value) <= 0) {
     return false;
   }
 
@@ -115,5 +119,9 @@ function toNumber(value) {
 }
 
 function roundCurrency(value) {
+  return Math.round(Number(value) * 100) / 100;
+}
+
+function roundQuantity(value) {
   return Math.round(Number(value) * 100) / 100;
 }
