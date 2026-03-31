@@ -111,7 +111,7 @@ test("fetchPolymarketAccountData resolves profile metadata and account payloads"
   assert.equal(result.totalEquity, 826.88);
   assert.equal(result.positions.length, 1);
   assert.match(calls[0], /\/profile\/0x304160997e2d06fbfc0f54a8a714dc4cdf7b9e5f$/);
-  assert.match(calls[1], /\/v1\/accounting\/snapshot\?user=0x304160997e2d06fbfc0f54a8a714dc4cdf7b9e5f$/);
+  assert.match(calls[1], /\/v1\/accounting\/snapshot\?user=0xe48a00a7eaec1977fa9f72af4422c1628367dc27$/);
   assert.match(
     calls[2],
     /\/positions\?user=0xe48a00a7eaec1977fa9f72af4422c1628367dc27&sortBy=CURRENT&sortDirection=DESC&sizeThreshold=0&limit=500&offset=0$/,

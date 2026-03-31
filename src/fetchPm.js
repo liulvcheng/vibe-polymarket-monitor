@@ -23,7 +23,7 @@ export async function fetchPolymarketAccountData({
   const { proxyAddress, username } = extractProfileMetadataFromHtml(profileHtml);
   const [accountingSnapshot, positionsPayload] = await Promise.all([
     fetchAccountingSnapshotWithRetry({
-      url: `https://data-api.polymarket.com/v1/accounting/snapshot?user=${address}`,
+      url: `https://data-api.polymarket.com/v1/accounting/snapshot?user=${proxyAddress}`,
       fetchImpl,
       timeoutMs,
       retryCount,
